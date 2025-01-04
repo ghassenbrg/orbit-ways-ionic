@@ -1,0 +1,7 @@
+{
+  "name": "orbit-ways",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
