@@ -120,6 +120,11 @@
 }
 
 .board-cell {
+  background-image: url('../../../assets/arrow.png');
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: center;
+
   background-color: #fef9e7;
   width: 100%;
   aspect-ratio: 1;
@@ -136,6 +141,27 @@
   @media (max-width: 400px) {
     height: 0;
     padding-bottom: 100%;
+  }
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+  &:hover {
+    transform: rotate(180deg);
+  }
+}
+
+.rotate-90 {
+  transform: rotate(90deg);
+  &:hover {
+    transform: rotate(90deg);
+  }
+}
+
+.rotate--90 {
+  transform: rotate(-90deg);
+  &:hover {
+    transform: rotate(-90deg);
   }
 }
 
@@ -243,4 +269,24 @@
   .final-winner {
     padding: 1rem;
   }
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.4s ease-in;
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.4s ease-out;
+}
+
+.zoom-in {
+  transform: scale(1.2); /* Scale up by 20% */
+  transition: transform 0.4s ease-in-out;
+}
+
+.zoom-out {
+  transform: scale(0.8); /* Scale down by 20% */
+  transition: transform 0.4s ease-in-out;
 }

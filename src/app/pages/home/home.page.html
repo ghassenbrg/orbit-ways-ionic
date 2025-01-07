@@ -62,11 +62,21 @@
             class="board-cell"
             *ngFor="let cell of row; let c = index"
             [ngClass]="{
-              'cell-black': cell === 'B',
-              'cell-white': cell === 'W'
-            }"
+              'rotate-180': arrowDirectionGrid['rotate-180'].includes(r + '' + c),
+              'rotate-90': arrowDirectionGrid['rotate-90'].includes(r + '' + c),
+              'rotate--90': arrowDirectionGrid['rotate--90'].includes(r + '' + c)
+              }"
             (click)="placeMarble(r, c)"
-          ></div>
+          >
+
+        <div [ngClass]="{
+          'fade-out': fadeStates[r][c],
+          'fade-in': !fadeStates[r][c],
+          'cell-black': cell === 'B',
+          'cell-white': cell === 'W'
+        }">
+      </div>
+        </div>
         </div>
       </div>
     </div>

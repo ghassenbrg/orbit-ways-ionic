@@ -11,14 +11,27 @@ import { WebsocketService } from 'src/app/service/websocket.service';
 })
 export class HomePage implements OnInit {
   board: string[][] = [];
-  players: {black: string, white: string} = {black: 'Black', white: 'White'}
+  players: { black: string; white: string } = {
+    black: 'Black',
+    white: 'White',
+  };
   currentPlayer: 'B' | 'W' = 'B';
   score = { B: 0, W: 0 };
   gameOver = false;
   winner: 'B' | 'W' | null = null;
 
+  arrowDirectionGrid: any = {
+    'rotate-180': ['01', '02', '03', '12'],
+    'rotate-90': ['00', '10', '20', '11'],
+    'rotate--90': ['33', '23', '13', '22'],
+    'rotate-0': ['30', '31', '32', '21'],
+  };
+
+  fadeStates: boolean[][] = [];
+
   // Are we done with the entire match (e.g., someone reached maxScore)?
   matchDone = false;
+  inProgress = false;
   finalWinner: 'B' | 'W' | null = null;
 
   // Fading animation for ring rotation
@@ -31,7 +44,7 @@ export class HomePage implements OnInit {
 
   get myTurn(): boolean {
     return (
-      !this.gameOver && !this.matchDone && this.currentPlayer === this.myColor
+      !this.gameOver && !this.matchDone && this.currentPlayer === this.myColor && !this.inProgress
     );
   }
 
@@ -74,53 +87,58 @@ export class HomePage implements OnInit {
         `/api/game/get?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
       )
       .subscribe((game) => {
+        this.initializeFadeStates();
         this.handleGameState(game);
       });
   }
 
+  initializeFadeStates() {
+    this.fadeStates = []; // Initialize the array
+
+    for (let r = 0; r < 4; r++) {
+      this.fadeStates[r] = []; // Initialize each row as an array
+      for (let c = 0; c < 4; c++) {
+        this.fadeStates[r][c] = false; // Set default value
+      }
+    }
+  }
+
   handleGameState(newState: any) {
-    console.log(newState);
-    // Animate ring rotation if the board changed
-    // (Simplest approach: always fade if there's a move.)
-    // We'll do a quick fade.
-    this.isRotating = true;
+    // Trigger fade-out
+    this.board.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        this.fadeStates[r][c] = true; // Apply fade-out
+      });
+    });
+
+    // Delay before updating board and triggering fade-in
     setTimeout(() => {
-      this.isRotating = false;
-    }, 400);
+      this.board = newState.board;
 
-    this.board = newState.board;
-    this.currentPlayer = newState.currentPlayer;
-    this.players.black = newState.playerBlack ? newState.playerBlack : 'Black';
-    this.players.white = newState.playerWhite ? newState.playerWhite : 'White';
-    this.score = {
-      B: newState.blackScore,
-      W: newState.whiteScore,
-    };
-    this.gameOver = newState.gameOver;
-    this.winner = newState.winner;
+      // Trigger fade-in with staggered delays
+      this.board.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          setTimeout(() => {
+            this.fadeStates[r][c] = false; // Remove fade-out
+          }, r * 100 + c * 50); // Stagger animations by row and column
+        });
+      });
 
-    // Check if we reached final match end (someone >= maxScore)
-    // The server must store "maxScore" in the Game object to do final check,
-    // but let's suppose the server sets "gameOver=true" + "winner=..."
-    // if the score hits maxScore. Then we can do:
-    if (newState.matchDone) {
-      // Suppose the server sets matchDone & finalWinner
-      this.matchDone = true;
-      this.finalWinner = newState.finalWinner;
-    } else {
-      // Or we can detect it from the score if needed...
-      if (
-        newState.maxScore &&
-        (this.score.B >= newState.maxScore || this.score.W >= newState.maxScore)
-      ) {
-        // match is done
+      this.currentPlayer = newState.currentPlayer;
+      this.players.black = newState.playerBlack || 'Black';
+      this.players.white = newState.playerWhite || 'White';
+      this.score = { B: newState.blackScore, W: newState.whiteScore };
+      this.gameOver = newState.gameOver;
+      this.winner = newState.winner;
+
+      if (newState.matchDone) {
         this.matchDone = true;
-        this.finalWinner = this.score.B > this.score.W ? 'B' : 'W';
+        this.finalWinner = newState.finalWinner;
       } else {
         this.matchDone = false;
         this.finalWinner = null;
       }
-    }
+    }, 0); // Duration of fade-out
   }
 
   resetBoard(fullReset: boolean) {
@@ -135,15 +153,26 @@ export class HomePage implements OnInit {
       console.log('Not your turn!');
       return;
     }
-    if ((this.board[r][c] && this.board[r][c] != 'EMPTY') || this.gameOver || this.matchDone) {
+    if (
+      (this.board[r][c] && this.board[r][c] != 'EMPTY') ||
+      this.gameOver ||
+      this.matchDone
+    ) {
       return;
     }
 
-    this.wsService.send('/app/placeMarble', {
-      roomId: this.roomId,
-      userId: this.myUserId,
-      row: r,
-      col: c,
-    });
+    this.inProgress = true;
+
+    this.board[r][c] = this.currentPlayer;
+
+    setTimeout(() => {
+      this.wsService.send('/app/placeMarble', {
+        roomId: this.roomId,
+        userId: this.myUserId,
+        row: r,
+        col: c,
+      });
+      this.inProgress = false;
+    }, 100);
   }
 }
