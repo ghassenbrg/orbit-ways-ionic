@@ -1,29 +1,72 @@
 <ion-header>
-    <ion-toolbar>
-      <ion-title>Enter Room Info</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content>
-    <ion-item>
-      <ion-label position="floating">Room ID</ion-label>
-      <ion-input [(ngModel)]="roomId"></ion-input>
-    </ion-item>
-  
-    <ion-item>
-      <ion-label position="floating">Your User ID</ion-label>
-      <ion-input [(ngModel)]="userId"></ion-input>
-    </ion-item>
-  
-    <ion-item>
-      <ion-label>Choose Your Color</ion-label>
-      <ion-select [(ngModel)]="chosenColor">
-        <ion-select-option value="B">Black</ion-select-option>
-        <ion-select-option value="W">White</ion-select-option>
-      </ion-select>
-    </ion-item>
-  
-    <ion-button expand="block" (click)="createRoom()">Create Room</ion-button>
-    <ion-button expand="block" (click)="joinRoom()">Join Room</ion-button>
-  </ion-content>
-  
+  <ion-toolbar>
+    <ion-title>Orbit Ways - Room</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="container-bg">
+    <!-- Main Card Container -->
+    <div class="room-form">
+      <h2>Create or Join a Room</h2>
+
+      <!-- Room ID Input -->
+      <ion-item lines="none" class="custom-item">
+        <ion-label position="stacked">Room ID</ion-label>
+        <ion-input
+          [(ngModel)]="roomId"
+          placeholder="e.g. 12345"
+          type="text"
+        ></ion-input>
+      </ion-item>
+
+      <!-- User ID Input -->
+      <ion-item lines="none" class="custom-item">
+        <ion-label position="stacked">User ID</ion-label>
+        <ion-input
+          [(ngModel)]="userId"
+          placeholder="e.g. alice123"
+          type="text"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Rounds to Win -->
+      <ion-item lines="none" class="custom-item">
+        <ion-label position="stacked">Rounds to Win</ion-label>
+        <ion-input
+          [(ngModel)]="maxScore"
+          type="number"
+          placeholder="3"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Color Selection -->
+      <div class="color-select">
+        <label class="color-label">Choose Color:</label>
+        <ion-segment mode="md" [(ngModel)]="chosenColor" class="color-segment">
+          <ion-segment-button value="B">
+            <ion-label>BLACK</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="W">
+            <ion-label>WHITE</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-row">
+        <ion-button (click)="createRoom()" class="cartoon-button" color="primary">
+          Create Room
+        </ion-button>
+        <ion-button (click)="joinRoom()" class="cartoon-button" color="tertiary">
+          Join Room
+        </ion-button>
+      </div>
+
+      <!-- Error / Info Message -->
+      <div *ngIf="errorMessage" class="error-label">
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+</ion-content>

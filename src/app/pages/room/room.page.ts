@@ -11,43 +11,75 @@ import { HttpClient } from '@angular/common/http';
 export class RoomPage {
   roomId: string = '';
   userId: string = '';
+  maxScore: number = 3;   // new field
   chosenColor: string = 'B'; // default
+  errorMessage: string = '';
 
   constructor(private router: Router, private http: HttpClient) {}
 
   createRoom() {
-    if (!this.roomId || !this.userId) return;
+    this.errorMessage = '';
+    if (!this.roomId || !this.userId) {
+      this.errorMessage = 'Please fill in Room ID and User ID.';
+      return;
+    }
 
-    // We pass both hostId and hostColor to the backend
+    // We pass hostId, hostColor, and maxScore to the backend
     this.http
       .post<any>(
-        `/api/game/create?roomId=${this.roomId}&hostId=${this.userId}&hostColor=${this.chosenColor}`,
+        `/api/game/create?roomId=${this.roomId}&hostId=${this.userId}&hostColor=${this.chosenColor}&maxScore=${this.maxScore}`,
         {}
       )
-      .subscribe((game) => {
-        console.log('Room created', game);
-        // Store my info in localStorage or pass via route
-        localStorage.setItem('myUserId', this.userId);
-        localStorage.setItem('myColor', this.chosenColor);
-
-        this.goToGame();
+      .subscribe({
+        next: (game) => {
+          console.log('Room created', game);
+          // Store my info in localStorage
+          localStorage.setItem('myUserId', this.userId);
+          localStorage.setItem('myColor', this.chosenColor);
+          localStorage.setItem('roomId', this.roomId);
+          // Navigate to game page
+          this.goToGame();
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Error creating room.';
+        }
       });
   }
 
   joinRoom() {
-    if (!this.roomId || !this.userId) return;
+    this.errorMessage = '';
+    if (!this.roomId || !this.userId) {
+      this.errorMessage = 'Please fill in Room ID and User ID.';
+      return;
+    }
 
-    // We pass both joinerId and joinerColor
+    // We pass joinerId and joinerColor
     this.http
       .get<any>(
         `/api/game/join?roomId=${this.roomId}&joinerId=${this.userId}&joinerColor=${this.chosenColor}`
       )
-      .subscribe((game) => {
-        console.log('Joined room', game);
-        localStorage.setItem('myUserId', this.userId);
-        localStorage.setItem('myColor', this.chosenColor);
+      .subscribe({
+        next: (game) => {
+          console.log('Joined room', game);
+          // Did the server auto-assign me a different color if chosen was taken?
+          // Let's figure out if I'm black or white from the response:
+          if (game.playerBlack === this.userId) {
+            localStorage.setItem('myColor', 'B');
+          } else if (game.playerWhite === this.userId) {
+            localStorage.setItem('myColor', 'W');
+          } else {
+            // Not assigned => error or room full
+            this.errorMessage = 'Room is full or you could not join.';
+            return;
+          }
 
-        this.goToGame();
+          localStorage.setItem('myUserId', this.userId);
+          localStorage.setItem('roomId', this.roomId);
+          this.goToGame();
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Error joining room.';
+        }
       });
   }
 

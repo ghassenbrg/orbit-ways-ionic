@@ -1,125 +1,105 @@
 <ion-header>
-    <ion-toolbar>
-      <ion-title>Orbit Ways</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content>
-    <div class="current-player" style="padding: 10px 10px 0 10px">
-      <div style="display: inline-flex; align-items: center">
-        <span style="color: #1a3836; margin-right: 5px">Current Player:</span>
+  <ion-toolbar>
+    <ion-title>Orbit Ways</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="container-bg">
+    <!-- Current Player & Score Display -->
+    <div class="info-bar" [ngClass]="{ 'game-finished': matchDone }">
+      <div class="info-item current-player">
+        <!--
+        <span class="label">Current Player:</span>
+        <div
+          class="player-indicator"
+          [ngClass]="currentPlayer === 'B' ? 'player-black' : 'player-white'"
+        ></div>
         <span
-          class="player-circle"
-          [ngClass]="currentPlayer === 'B' ? 'B-ball' : 'W-ball'"
-        ></span>
+          class="player-label"
+          [style]="{ color: currentPlayer === 'B' ? 'black' : 'white' }"
+        >
+          ({{ currentPlayer === 'B' ? 'Black' : 'White'}})
+        </span>
+        -->
+        <!-- Show if it's MY turn or not -->
         <span
-          [style]="{ padding: '0 0 0 5px', color: currentPlayer === 'B' ? 'black' : 'white' }"
+          *ngIf="myTurn; else noTurn"
+          class="turn-label turn-active"
         >
-          ({{ currentPlayer === 'B' ? 'Black' : 'White' }})
+          It's your turn!
         </span>
+        <ng-template #noTurn>
+          <span class="turn-label turn-waiting">
+            Waiting...
+          </span>
+        </ng-template>
+      </div>
+
+      <hr />
+
+      <div class="info-item">
+        <span class="label" style="margin-right: 0 !important;">{{players.black === this.myUserId ? 'You': players.black}} (</span>
+        <div class="score-indicator player-black"></div>
+        <span class="label">) :</span>
+        <span class="score">{{ score.B }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label" style="margin-right: 0 !important;">{{players.white === this.myUserId ? 'You': players.white}} (</span>
+        <div class="score-indicator player-white"></div>
+        <span class="label">) :</span>
+        <span class="score">{{ score.W }}</span>
+      </div>
+
+      <hr />
+    </div>
+
+    <!-- Board Area -->
+    <div class="board-container">
+      <div class="board-grid" [class.ring-rotating]="isRotating">
+        <div class="board-row" *ngFor="let row of board; let r = index">
+          <div
+            class="board-cell"
+            *ngFor="let cell of row; let c = index"
+            [ngClass]="{
+              'cell-black': cell === 'B',
+              'cell-white': cell === 'W'
+            }"
+            (click)="placeMarble(r, c)"
+          ></div>
+        </div>
       </div>
     </div>
-    <hr color="white" />
-  
-    <div class="score" style="padding: 10px 10px 0 10px">
-      <div class="black-score" style="display: inline-flex; align-items: center">
-        <span style="color: #1a3836; margin-right: 5px">Black </span>
-        <span class="player-circle B-ball"></span>
-        <span style="color: #1a3836; margin-left: 5px">
-          : {{ score.B }}
-        </span>
+
+    <!-- Result / Game Over for this Round -->
+    <div class="result-board" *ngIf="gameOver && !matchDone">
+      <div *ngIf="winner === 'B'" class="winner-panel black-winner">
+        Black wins this round!!
       </div>
-    </div>
-  
-    <div class="score" style="padding: 10px 10px 0 10px">
-      <div class="white-score" style="display: inline-flex; align-items: right">
-        <span style="color: #1a3836; margin-right: 5px">White </span>
-        <span class="player-circle W-ball"></span>
-        <span style="color: #1a3836; margin-left: 5px">
-          : {{ score.W }}
-        </span>
+      <div *ngIf="winner === 'W'" class="winner-panel white-winner">
+        White wins this round!!
       </div>
-    </div>
-    <hr color="white" />
-  
-    <div class="container" style="margin: 2vh 0">
-      <div class="board-bg">
-        <div class="board-grid">
-          <div class="board-row" *ngFor="let row of board; let r = index">
-            <div
-              class="board-cell"
-              [ngClass]="cell ? cell + '-ball' : ''"
-              *ngFor="let cell of row; let c = index"
-              (click)="placeMarble(r, c)"
-            ></div>
-          </div>
-        </div>
+      <div *ngIf="winner === null" class="winner-panel tie-winner">
+        It’s a tie !!
       </div>
-  
-      <div class="result-board" *ngIf="gameOver">
-        <div
-          class="W-winner"
-          *ngIf="winner == 'B'"
-          style="
-            background-color: rgb(48, 52, 55);
-            padding: 10px 0px;
-            margin: 10px;
-            border-radius: 20px;
-            text-align: center;
-          "
-        >
-          <span>Black is the Winner !!</span>
-        </div>
-        <div
-          class="B-winner"
-          *ngIf="winner == 'W'"
-          style="
-            background-color: rgb(215, 218, 220);
-            padding: 10px 0px;
-            margin: 10px;
-            border-radius: 20px;
-            text-align: center;
-          "
-        >
-          <span style="color: rgb(25, 28, 30)">White is the Winner !!</span>
-        </div>
-        <div
-          class="tie"
-          *ngIf="winner === null"
-          style="
-            background-color: #3e706d;
-            padding: 10px 0px;
-            margin: 10px;
-            border-radius: 20px;
-            text-align: center;
-          "
-        >
-          <span>It's a tie !!</span>
-        </div>
-        <button
-          style="
-            background-color: #126c7c;
-            border-radius: 10px;
-            padding: 10px 30px;
-            margin: 10px 30vw;
-          "
-          (click)="resetBoard(false)"
-        >
-          Next Round !
-        </button>
-      </div>
-  
-      <button
-        style="
-          background-color: #691a40;
-          border-radius: 10px;
-          padding: 10px 30px;
-          margin: 10px 37vw;
-        "
-        (click)="resetBoard(true)"
-      >
-        Reset
+      <button class="round-button" (click)="resetBoard(false)">
+        Next Round !
       </button>
     </div>
-  </ion-content>
-  
+
+    <!-- Match Done -->
+    <div class="result-board match-done" *ngIf="matchDone">
+      <div class="winner-panel final-winner" [ngClass]="{
+        'black-winner': finalWinner === 'B',
+        'white-winner': finalWinner === 'W'
+      }">
+        {{ finalWinner === 'B' ? players.black : players.white }} wins the match!!
+      </div>
+    </div>
+
+    <!-- Full Reset Button -->
+    <button class="reset-button" (click)="resetBoard(true)">
+      Reset
+    </button>
+  </div>
+</ion-content>

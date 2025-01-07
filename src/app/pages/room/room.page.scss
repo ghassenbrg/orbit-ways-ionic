@@ -1,0 +1,97 @@
+/* If using a custom font, e.g., Fredoka One, ensure it’s globally imported. */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+.container-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 1rem;
+  background: linear-gradient(to bottom right, #f6caca, #8de5e4);
+  font-family: 'Fredoka One', sans-serif;
+  box-sizing: border-box;
+}
+
+/* The main card / form container */
+.room-form {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 15px;
+  box-shadow: 0 0 8px #444;
+  width: 90%;
+  max-width: 400px;
+  padding: 1.5rem;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.8rem;
+    color: #333;
+  }
+}
+
+/* Ion-Item styling */
+.custom-item {
+  margin-bottom: 1.2rem;
+  --background: transparent;
+  --border-radius: 10px;
+
+  ion-label {
+    color: #333;
+    font-size: 1.1rem;
+  }
+
+  ion-input {
+    font-size: 1rem;
+  }
+}
+
+/* Segment for color selection */
+.color-select {
+  margin: 1rem 0;
+
+  .color-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    color: #333;
+  }
+
+  .color-segment {
+    ion-segment-button {
+      font-weight: 600;
+      --indicator-color: #fb8c00; /* The highlight under the selected segment */
+      --indicator-height: 4px;
+      ion-label {
+        color: #fff;
+      }
+    }
+  }
+}
+
+/* Align create/join buttons side-by-side */
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Cartoonish button style */
+.cartoon-button {
+  font-weight: 600;
+  border-radius: 20px;
+  box-shadow: 2px 2px 5px #666;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  --ripple-color: #ffb300;
+  font-size: 1rem;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.error-label {
+  margin-top: 1rem;
+  color: #a32626;
+  font-size: 1.1rem;
+  font-weight: 600;
+}

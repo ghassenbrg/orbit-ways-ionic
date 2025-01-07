@@ -1,99 +1,149 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { WebsocketService } from 'src/app/service/websocket.service';
-
-type CellValue = 'B' | 'W' | ''; 
 
 @Component({
   selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
-  standalone: false
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
+  standalone: false,
 })
 export class HomePage implements OnInit {
-  board: CellValue[][] = [];
-  currentPlayer: CellValue = 'B';
+  board: string[][] = [];
+  players: {black: string, white: string} = {black: 'Black', white: 'White'}
+  currentPlayer: 'B' | 'W' = 'B';
+  score = { B: 0, W: 0 };
   gameOver = false;
-  winner: CellValue | null = null;
-  score: any = { B: 0, W: 0 };
+  winner: 'B' | 'W' | null = null;
 
+  // Are we done with the entire match (e.g., someone reached maxScore)?
+  matchDone = false;
+  finalWinner: 'B' | 'W' | null = null;
+
+  // Fading animation for ring rotation
+  isRotating = false;
+
+  // My color
+  myColor: 'B' | 'W' | null = null;
   roomId: string = '';
-  // NEW:
   myUserId: string = '';
-  myColor: CellValue = 'B'; 
+
+  get myTurn(): boolean {
+    return (
+      !this.gameOver && !this.matchDone && this.currentPlayer === this.myColor
+    );
+  }
 
   constructor(
-    private route: ActivatedRoute,
     private wsService: WebsocketService,
+    private route: ActivatedRoute,
     private http: HttpClient
   ) {}
 
   ngOnInit() {
-    // Grab roomId
-    this.roomId = this.route.snapshot.paramMap.get('id') || '';
-    // Retrieve my stored user ID + color
-    this.myUserId = localStorage.getItem('myUserId') || 'UnknownUser';
-    this.myColor = (localStorage.getItem('myColor') as CellValue) || 'B';
+    // Read route param for room ID
+    this.route.params.subscribe((params) => {
+      this.roomId = params['id'];
+    });
 
-    // Initialize WebSocket
+    // Read user info from localStorage
+    this.myUserId = localStorage.getItem('myUserId') || '';
+    const color = localStorage.getItem('myColor');
+    this.myColor = color === 'W' ? 'W' : 'B';
+
+    // Connect
     this.wsService.connect();
-    // Subscribe to the room’s topic once connected
+
+    // Wait for connection
     this.wsService.isConnected().subscribe((connected) => {
-      if (connected) {
-        this.wsService.subscribe(`/topic/room/${this.roomId}`, (gameState) => {
-          this.updateFromServer(gameState);
-        });
+      if (connected && this.roomId) {
+        // Subscribe to /topic/room/<roomId> for game updates
+        this.wsService.subscribe(
+          `/topic/room/${this.roomId}`,
+          (newState: any) => {
+            this.handleGameState(newState);
+          }
+        );
       }
     });
 
     // Do an initial get to fetch the current game state
     this.http
       .get<any>(
-        `/api/game/join?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
+        `/api/game/get?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
       )
       .subscribe((game) => {
-        this.updateFromServer(game);
+        this.handleGameState(game);
       });
   }
 
-  updateFromServer(game: any) {
-    this.gameOver = game.gameOver;
-    this.winner = game.winner === null ? null : (game.winner as CellValue);
-    this.board = game.board.map((row: string[]) =>
-      row.map((cell: string) => (cell === 'B' ? 'B' : cell === 'W' ? 'W' : ''))
-    );
-    this.currentPlayer =
-      game.currentPlayer === 'B' ? 'B' : game.currentPlayer === 'W' ? 'W' : '';
-    this.score.B = game.blackScore;
-    this.score.W = game.whiteScore;
+  handleGameState(newState: any) {
+    console.log(newState);
+    // Animate ring rotation if the board changed
+    // (Simplest approach: always fade if there's a move.)
+    // We'll do a quick fade.
+    this.isRotating = true;
+    setTimeout(() => {
+      this.isRotating = false;
+    }, 400);
+
+    this.board = newState.board;
+    this.currentPlayer = newState.currentPlayer;
+    this.players.black = newState.playerBlack ? newState.playerBlack : 'Black';
+    this.players.white = newState.playerWhite ? newState.playerWhite : 'White';
+    this.score = {
+      B: newState.blackScore,
+      W: newState.whiteScore,
+    };
+    this.gameOver = newState.gameOver;
+    this.winner = newState.winner;
+
+    // Check if we reached final match end (someone >= maxScore)
+    // The server must store "maxScore" in the Game object to do final check,
+    // but let's suppose the server sets "gameOver=true" + "winner=..."
+    // if the score hits maxScore. Then we can do:
+    if (newState.matchDone) {
+      // Suppose the server sets matchDone & finalWinner
+      this.matchDone = true;
+      this.finalWinner = newState.finalWinner;
+    } else {
+      // Or we can detect it from the score if needed...
+      if (
+        newState.maxScore &&
+        (this.score.B >= newState.maxScore || this.score.W >= newState.maxScore)
+      ) {
+        // match is done
+        this.matchDone = true;
+        this.finalWinner = this.score.B > this.score.W ? 'B' : 'W';
+      } else {
+        this.matchDone = false;
+        this.finalWinner = null;
+      }
+    }
+  }
+
+  resetBoard(fullReset: boolean) {
+    this.wsService.send('/app/resetGame', {
+      roomId: this.roomId,
+      fullReset: fullReset,
+    });
   }
 
   placeMarble(r: number, c: number) {
-    if (this.gameOver) return;
-    // Optional client-side check:
-    if (this.currentPlayer !== this.myColor) {
-      // It's not my turn, do nothing
+    if (!this.myTurn) {
+      console.log('Not your turn!');
+      return;
+    }
+    if ((this.board[r][c] && this.board[r][c] != 'EMPTY') || this.gameOver || this.matchDone) {
       return;
     }
 
     this.wsService.send('/app/placeMarble', {
       roomId: this.roomId,
-      userId: this.myUserId, // <--- pass userId
+      userId: this.myUserId,
       row: r,
       col: c,
     });
-    // The server will broadcast the updated game to everyone
-  }
-
-  resetBoard(clearScore: boolean) {
-    this.http
-      .post<any>(
-        `/api/game/reset?roomId=${this.roomId}&clearScore=${clearScore}`,
-        {}
-      )
-      .subscribe((game) => {
-        this.updateFromServer(game);
-      });
   }
 }
