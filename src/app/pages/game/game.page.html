@@ -5,7 +5,26 @@
 </ion-header>
 
 <ion-content>
+  <!-- Popup Message -->
+  <div class="popup-message-container" *ngIf="showPopup">
+    <div class="popup-message">
+      <h2>It seems a Kana player is here!</h2>
+      <p>If you're Yoshida Kana, I wanna say I love you 😊❤️✨</p>
+      <button class="fun-button" (click)="dismissPopup()">
+        Let's Have Fun!
+      </button>
+    </div>
+    <div class="black-bg"></div>
+  </div>
+
   <div class="container-bg">
+    <!--
+    <span style="color: rgb(65, 65, 149);">{{'this.gameOver: ' + this.gameOver
+    + ' | this.matchDone: ' + this.matchDone
+    + ' | this.currentPlayer: ' + this.currentPlayer 
+    + ' | this.myColor: ' + this.myColor
+    + ' | this.inProgress: ' + this.inProgress }} </span>
+    -->
     <!-- Current Player & Score Display -->
     <div class="info-bar" [ngClass]="{ 'game-finished': matchDone }">
       <div class="info-item current-player">
@@ -23,32 +42,35 @@
         </span>
         -->
         <!-- Show if it's MY turn or not -->
-        <span
-          *ngIf="myTurn; else noTurn"
-          class="turn-label turn-active"
-        >
+        <span *ngIf="myTurn; else noTurn" class="turn-label turn-active">
           It's your turn!
         </span>
         <ng-template #noTurn>
-          <span class="turn-label turn-waiting">
-            Waiting...
-          </span>
+          <span class="turn-label turn-waiting"> Waiting... </span>
         </ng-template>
       </div>
 
       <hr />
 
       <div class="info-item">
-        <span class="label" style="margin-right: 0 !important;">{{players.black === this.myUserId ? 'You': players.black}} (</span>
+        <span class="label" style="margin-right: 0 !important"
+          >{{players.black === this.myUserId ? 'You' : players.black}}
+          {{players.black.toLowerCase() === 'kana' ? '❤️' : ''}}
+          (</span
+        >
         <div class="score-indicator player-black"></div>
         <span class="label">) :</span>
-        <span class="score">{{ score.B }}</span>
+        <span class="score">{{ score.B + '/' + maxScore }}</span>
       </div>
       <div class="info-item">
-        <span class="label" style="margin-right: 0 !important;">{{players.white === this.myUserId ? 'You': players.white}} (</span>
+        <span class="label" style="margin-right: 0 !important"
+          >{{players.white === this.myUserId ? 'You': players.white}}
+          {{players.white.toLowerCase() === 'kana' ? '❤️' : ''}}
+          (</span
+        >
         <div class="score-indicator player-white"></div>
         <span class="label">) :</span>
-        <span class="score">{{ score.W }}</span>
+        <span class="score">{{ score.W + '/' + maxScore }}</span>
       </div>
 
       <hr />
@@ -61,26 +83,26 @@
           <div
             class="board-cell"
             *ngFor="let cell of row; let c = index"
+            [attr.data-row]="r"
+            [attr.data-col]="c"
             [ngClass]="{
-              'rotate-180': arrowDirectionGrid['rotate-180'].includes(r + '' + c),
-              'rotate-90': arrowDirectionGrid['rotate-90'].includes(r + '' + c),
-              'rotate--90': arrowDirectionGrid['rotate--90'].includes(r + '' + c)
-              }"
-            (click)="placeMarble(r, c)"
+    'rotate-180': arrowDirectionGrid['rotate-180'].includes(r + '' + c),
+    'rotate-90': arrowDirectionGrid['rotate-90'].includes(r + '' + c),
+    'rotate--90': arrowDirectionGrid['rotate--90'].includes(r + '' + c),
+    'rotate-0': arrowDirectionGrid['rotate-0'].includes(r + '' + c)
+  }"
+            (click)="placeMarble(r, c, myUserId)"
           >
-
-        <div class="fade-in" [ngClass]="{
-          'fade-out': fadeStates[r][c],
-          'fade-in': !fadeStates[r][c],
-          'cell-black': cell === 'B',
-          'cell-white': cell === 'W'
-        }">
-      </div>
-        </div>
+            <div
+              [ngClass]="{
+    'cell-black': cell === 'B',
+    'cell-white': cell === 'W'
+  }"
+            ></div>
+          </div>
         </div>
       </div>
     </div>
-
     <!-- Result / Game Over for this Round -->
     <div class="result-board" *ngIf="gameOver && !matchDone">
       <div *ngIf="winner === 'B'" class="winner-panel black-winner">
@@ -99,18 +121,21 @@
 
     <!-- Match Done -->
     <div class="result-board match-done" *ngIf="matchDone">
-      <div class="winner-panel final-winner" [ngClass]="{
+      <div
+        class="winner-panel final-winner"
+        [ngClass]="{
         'black-winner': finalWinner === 'B',
         'white-winner': finalWinner === 'W'
-      }">
-        {{ finalWinner === 'B' ? players.black : players.white }} wins the match!!
+      }"
+      >
+        {{ finalWinner === 'B' ? players.black : players.white }} wins the
+        match!!
       </div>
     </div>
 
-    <!-- Full Reset Button -->
-    <button class="reset-button" (click)="resetBoard(true)">
-      Reset
-    </button>
+    <div class="button-container">
+      <button class="reset-button" (click)="resetBoard(true)">Reset</button>
+      <button class="quit-button" (click)="quit()">Quit</button>
+    </div>
   </div>
-  
 </ion-content>

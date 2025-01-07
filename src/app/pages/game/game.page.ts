@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WebsocketService } from 'src/app/service/websocket.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-game',
@@ -10,6 +11,8 @@ import { WebsocketService } from 'src/app/service/websocket.service';
   standalone: false,
 })
 export class GamePage implements OnInit {
+  boardclientId: string = '';
+
   board: string[][] = [];
   players: { black: string; white: string } = {
     black: 'Black',
@@ -27,8 +30,6 @@ export class GamePage implements OnInit {
     'rotate-0': ['30', '31', '32', '21'],
   };
 
-  fadeStates: boolean[][] = [];
-
   // Are we done with the entire match (e.g., someone reached maxScore)?
   matchDone = false;
   inProgress = false;
@@ -41,20 +42,28 @@ export class GamePage implements OnInit {
   myColor: 'B' | 'W' | null = null;
   roomId: string = '';
   myUserId: string = '';
+  maxScore: any;
+  showPopup: boolean = false;
 
   get myTurn(): boolean {
     return (
-      !this.gameOver && !this.matchDone && this.currentPlayer === this.myColor && !this.inProgress
+      !this.gameOver &&
+      !this.matchDone &&
+      this.currentPlayer === this.myColor &&
+      !this.inProgress
     );
   }
 
   constructor(
     private wsService: WebsocketService,
     private route: ActivatedRoute,
+    private router: Router,
     private http: HttpClient
   ) {}
 
   ngOnInit() {
+    this.boardclientId = uuidv4();
+    console.log(this.boardclientId);
     // Read route param for room ID
     this.route.params.subscribe((params) => {
       this.roomId = params['id'];
@@ -75,7 +84,17 @@ export class GamePage implements OnInit {
         this.wsService.subscribe(
           `/topic/room/${this.roomId}`,
           (newState: any) => {
-            this.handleGameState(newState);
+            this.handleGameState(newState, true);
+          }
+        );
+
+        this.wsService.subscribe(
+          `/topic/room/${this.roomId}/placeMarble`,
+          (body: any) => {
+            if (this.boardclientId !== body.marbleMessage?.boardclientId) {
+              this.placeMarbleServer(body);
+            }
+            this.handleGameState(body, false);
           }
         );
       }
@@ -87,58 +106,32 @@ export class GamePage implements OnInit {
         `/api/game/get?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
       )
       .subscribe((game) => {
-        this.initializeFadeStates();
-        this.handleGameState(game);
+        this.handleGameState(game, true);
+        this.checkForKana();
       });
   }
 
-  initializeFadeStates() {
-    this.fadeStates = []; // Initialize the array
-
-    for (let r = 0; r < 4; r++) {
-      this.fadeStates[r] = []; // Initialize each row as an array
-      for (let c = 0; c < 4; c++) {
-        this.fadeStates[r][c] = false; // Set default value
-      }
-    }
-  }
-
-  handleGameState(newState: any) {
-    // Trigger fade-out
-    this.board.forEach((row, r) => {
-      row.forEach((cell, c) => {
-        this.fadeStates[r][c] = true; // Apply fade-out
-      });
-    });
-
-    // Delay before updating board and triggering fade-in
-    setTimeout(() => {
+  handleGameState(newState: any, updateBoard: boolean) {
+    if (updateBoard) {
       this.board = newState.board;
+    }
 
-      // Trigger fade-in with staggered delays
-      this.board.forEach((row, r) => {
-        row.forEach((cell, c) => {
-          setTimeout(() => {
-            //this.fadeStates[r][c] = false; // Remove fade-out
-          }, r * 100 + c * 50); // Stagger animations by row and column
-        });
-      });
+    console.log(newState);
+    this.currentPlayer = newState.currentPlayer;
+    this.maxScore = newState.maxScore;
+    this.players.black = newState.playerBlack || 'Black';
+    this.players.white = newState.playerWhite || 'White';
+    this.score = { B: newState.blackScore, W: newState.whiteScore };
+    this.gameOver = newState.gameOver;
+    this.winner = newState.winner;
 
-      this.currentPlayer = newState.currentPlayer;
-      this.players.black = newState.playerBlack || 'Black';
-      this.players.white = newState.playerWhite || 'White';
-      this.score = { B: newState.blackScore, W: newState.whiteScore };
-      this.gameOver = newState.gameOver;
-      this.winner = newState.winner;
-
-      if (newState.matchDone) {
-        this.matchDone = true;
-        this.finalWinner = newState.finalWinner;
-      } else {
-        this.matchDone = false;
-        this.finalWinner = null;
-      }
-    }, 400); // Duration of fade-out
+    if (newState.matchDone) {
+      this.matchDone = true;
+      this.finalWinner = newState.finalWinner;
+    } else {
+      this.matchDone = false;
+      this.finalWinner = null;
+    }
   }
 
   resetBoard(fullReset: boolean) {
@@ -148,31 +141,138 @@ export class GamePage implements OnInit {
     });
   }
 
-  placeMarble(r: number, c: number) {
-    if (!this.myTurn) {
-      console.log('Not your turn!');
-      return;
-    }
-    if (
-      (this.board[r][c] && this.board[r][c] != 'EMPTY') ||
-      this.gameOver ||
-      this.matchDone
-    ) {
-      return;
+  placeMarbleServer(bodyResponse: any) {
+    this.placeMarble(
+      bodyResponse?.marbleMessage?.row,
+      bodyResponse?.marbleMessage?.col,
+      bodyResponse?.marbleMessage?.userId,
+      true
+    );
+  }
+
+  placeMarble(r: number, c: number, userId: string, serverMove?: boolean) {
+    if (!serverMove) {
+      if (!this.myTurn) {
+        console.log('Not your turn!');
+        return;
+      }
+      if (
+        (this.board[r][c] && this.board[r][c] != 'EMPTY') ||
+        this.gameOver ||
+        this.matchDone
+      ) {
+        return;
+      }
     }
 
     this.inProgress = true;
 
-    this.board[r][c] = this.currentPlayer;
+    this.board[r][c] = this.players.black === userId ? 'B' : 'W';
 
     setTimeout(() => {
-      this.wsService.send('/app/placeMarble', {
-        roomId: this.roomId,
-        userId: this.myUserId,
-        row: r,
-        col: c,
-      });
+      this.rotateGrid();
       this.inProgress = false;
-    }, 5000);
+    }, 400);
+
+    if (!serverMove) {
+      setTimeout(() => {
+        this.wsService.send('/app/placeMarble', {
+          roomId: this.roomId,
+          userId: this.myUserId,
+          row: r,
+          col: c,
+          boardclientId: this.boardclientId,
+        });
+        this.inProgress = false;
+      }, 400);
+    }
+  }
+
+  rotateGrid() {
+    const directionMap: any = {
+      'rotate-0': { dr: 0, dc: 1 }, // Move right
+      'rotate-90': { dr: 1, dc: 0 }, // Move down
+      'rotate-180': { dr: 0, dc: -1 }, // Move left
+      'rotate--90': { dr: -1, dc: 0 }, // Move up
+    };
+
+    const newBoard: string[][] = Array.from(
+      { length: 4 },
+      () => Array(4).fill('EMPTY') // Initialize a new empty grid
+    );
+
+    const cellAnimations: { r: number; c: number; transform: string }[] = [];
+
+    for (let r = 0; r < this.board.length; r++) {
+      for (let c = 0; c < this.board[r].length; c++) {
+        // Determine the current rotation of the cell
+        let rotation = 'rotate-0';
+        if (this.arrowDirectionGrid['rotate-90'].includes(`${r}${c}`)) {
+          rotation = 'rotate-90';
+        } else if (this.arrowDirectionGrid['rotate-180'].includes(`${r}${c}`)) {
+          rotation = 'rotate-180';
+        } else if (this.arrowDirectionGrid['rotate--90'].includes(`${r}${c}`)) {
+          rotation = 'rotate--90';
+        }
+
+        // Get the direction of movement
+        const { dr, dc } = directionMap[rotation];
+
+        // Calculate the new position (wrap around the grid if necessary)
+        const newR = (r + dr + 4) % 4;
+        const newC = (c + dc + 4) % 4;
+
+        // Move the content to the new position
+        newBoard[newR][newC] = this.board[r][c];
+
+        // Store animation details
+        const translateX = (newC - c) * 100; // 100% per cell
+        const translateY = (newR - r) * 100; // 100% per cell
+        cellAnimations.push({
+          r,
+          c,
+          transform: `translate(${translateX}%, ${translateY}%)`,
+        });
+      }
+    }
+
+    // Trigger animations
+    cellAnimations.forEach(({ r, c, transform }) => {
+      const cellElement = document.querySelector(
+        `.board-cell[data-row="${r}"][data-col="${c}"]`
+      ) as HTMLElement;
+      if (cellElement) {
+        cellElement.style.transform = transform;
+      }
+    });
+
+    // Update the board state after animations
+    setTimeout(() => {
+      this.board = newBoard;
+      cellAnimations.forEach(({ r, c }) => {
+        const cellElement = document.querySelector(
+          `.board-cell[data-row="${r}"][data-col="${c}"]`
+        ) as HTMLElement;
+        if (cellElement) {
+          cellElement.style.transform = 'none'; // Reset transform
+        }
+      });
+    }, 100); // Match the animation duration
+  }
+
+  quit() {
+    this.router.navigate(['/room']);
+  }
+
+  //--- kana message
+  checkForKana() {
+    // Compare ignoring case
+    if (this.myUserId.toLowerCase() === 'kana') {
+      this.showPopup = true;
+    }
+  }
+
+  dismissPopup() {
+    this.showPopup = false;
   }
 }

@@ -1,11 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
 
 .container-bg {
-  font-family: 'Fredoka One', sans-serif;
+  font-family: "Fredoka One", sans-serif;
   background: linear-gradient(to bottom right, #f6caca, #8de5e4);
-  height: 100%;
   padding: 1rem;
+  min-height: 100%;
   box-sizing: border-box;
+  background-attachment: fixed;
+  background-size: cover; /* Make sure the image covers the entire container */
+  background-position: center; /* Center the background */
+  background-repeat: no-repeat; /* Avoid tiling */
+  background-attachment: fixed; /* The magic property for fixed background */
 }
 
 .info-bar {
@@ -53,7 +58,6 @@
     margin-left: 5px;
     font-size: 1.2rem;
   }
-  
 }
 
 .turn-label {
@@ -120,7 +124,7 @@
 }
 
 .board-cell {
-  background-image: url('../../../assets/arrow.png');
+  background-image: url("../../../assets/arrow.png");
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: center;
@@ -240,13 +244,21 @@
   animation: final-flash 2s infinite;
 }
 @keyframes final-flash {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); background-color: #2bd3d0; }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+    background-color: #2bd3d0;
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .round-button,
-.reset-button {
+.reset-button,
+.quit-button {
   color: #fff;
   font-weight: 600;
   border: none;
@@ -267,11 +279,14 @@
 .reset-button {
   background: linear-gradient(to bottom right, #f6caca, #8de5e4);
   color: #525252;
-  
 }
 
 .round-button {
   background-color: #439fb2;
+}
+
+.quit-button {
+  background-color: #c91e5a;
 }
 
 .match-done {
@@ -280,8 +295,6 @@
     padding: 1rem;
   }
 }
-
-
 
 @keyframes ball-disappear {
   0% {
@@ -317,7 +330,8 @@
   position: relative; /* Required for inner div positioning */
 }
 
-.fade-in, .fade-out {
+.fade-in,
+.fade-out {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -328,7 +342,8 @@
   align-items: center;
 }
 
-.cell-black::after, .cell-white::after {
+.cell-black::after,
+.cell-white::after {
   content: "";
   width: 60%;
   height: 60%;
@@ -340,4 +355,88 @@
 
 .cell-white::after {
   background-color: white; /* For white */
+}
+
+.button-container {
+  display: flex; /* Align buttons in a row */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically (if needed) */
+  gap: 0.5rem; /* Reduce spacing between buttons */
+  margin: 1rem auto; /* Center the container and add some spacing */
+  width: fit-content; /* Ensure the container size wraps around buttons */
+}
+
+.reset-button,
+.quit-button {
+  display: inline-block; /* Ensure buttons are inline */
+  padding: 0.75rem 2rem; /* Adjust padding for button size */
+}
+
+// --------- Kana Message
+.black-bg {
+  background-color: rgba(0, 0, 0, 0.7); /* Black color with 50% opacity */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  position: fixed; /* Fixed position to cover the viewport */
+  top: 0;
+  left: 0;
+  z-index: 1; /* Ensures it's on top of other elements */
+}
+
+.popup-message {
+  z-index: 2;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 400px;
+  background: white;
+  color: #333;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-message h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: #e74c3c;
+}
+
+.popup-message p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.fun-button {
+  padding: 0.75rem 1.5rem;
+  background: #439fb2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.fun-button:hover {
+  background-color: #317f91;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
