@@ -69,7 +69,7 @@
             (click)="placeMarble(r, c)"
           >
 
-        <div [ngClass]="{
+        <div class="fade-in" [ngClass]="{
           'fade-out': fadeStates[r][c],
           'fade-in': !fadeStates[r][c],
           'cell-black': cell === 'B',
@@ -84,10 +84,10 @@
     <!-- Result / Game Over for this Round -->
     <div class="result-board" *ngIf="gameOver && !matchDone">
       <div *ngIf="winner === 'B'" class="winner-panel black-winner">
-        Black wins this round!!
+        {{players.black}} wins this round!!
       </div>
       <div *ngIf="winner === 'W'" class="winner-panel white-winner">
-        White wins this round!!
+        {{players.white}} wins this round!!
       </div>
       <div *ngIf="winner === null" class="winner-panel tie-winner">
         It’s a tie !!
@@ -112,4 +112,5 @@
       Reset
     </button>
   </div>
+  
 </ion-content>

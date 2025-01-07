@@ -125,11 +125,11 @@
   background-repeat: no-repeat;
   background-position: center;
 
-  background-color: #fef9e7;
+  background-color: #b04e5d;
   width: 100%;
   aspect-ratio: 1;
   border-radius: 15px;
-  box-shadow: inset 0 0 5px #999;
+  box-shadow: inset 0 0 5px #c7c7c7;
   cursor: pointer;
   position: relative;
   transition: transform 0.2s ease, background-color 0.5s;
@@ -179,10 +179,19 @@
 
 .cell-black::after {
   background-color: #000;
+
+  background: url("../../../assets/game/black_ball.png") no-repeat center center;
+  background-size: contain;
+
+  box-shadow: 0 0 3px #646464;
 }
 
 .cell-white::after {
   background-color: #fff;
+
+  background: url("../../../assets/game/white_ball.png") no-repeat center center;
+  background-size: contain;
+
   box-shadow: 0 0 3px #000;
 }
 
@@ -251,13 +260,14 @@
   transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #ffb300;
     transform: scale(1.05);
   }
 }
 
 .reset-button {
-  background-color: #d06a4b;
+  background: linear-gradient(to bottom right, #f6caca, #8de5e4);
+  color: #525252;
+  
 }
 
 .round-button {
@@ -271,22 +281,63 @@
   }
 }
 
+
+
+@keyframes ball-disappear {
+  0% {
+    opacity: 1;
+    transform: scale(1); /* Full size */
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0); /* Shrink to invisible */
+  }
+}
+
+@keyframes ball-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0); /* Start from invisible */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1); /* Grow to full size */
+  }
+}
+
 .fade-out {
-  opacity: 0;
-  transition: opacity 0.4s ease-in;
+  animation: ball-disappear 0.5s ease-in-out forwards;
 }
 
 .fade-in {
-  opacity: 1;
-  transition: opacity 0.4s ease-out;
+  animation: ball-appear 0.5s ease-in-out forwards;
 }
 
-.zoom-in {
-  transform: scale(1.2); /* Scale up by 20% */
-  transition: transform 0.4s ease-in-out;
+.board-cell {
+  position: relative; /* Required for inner div positioning */
 }
 
-.zoom-out {
-  transform: scale(0.8); /* Scale down by 20% */
-  transition: transform 0.4s ease-in-out;
+.fade-in, .fade-out {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell-black::after, .cell-white::after {
+  content: "";
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  background-color: black; /* For black */
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.cell-white::after {
+  background-color: white; /* For white */
 }

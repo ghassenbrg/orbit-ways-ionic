@@ -84,6 +84,6 @@ export class RoomPage {
   }
 
   goToGame() {
-    this.router.navigate(['/home', this.roomId]);
+    this.router.navigate(['/game', this.roomId]);
   }
 }

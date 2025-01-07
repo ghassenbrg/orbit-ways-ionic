@@ -13,9 +13,9 @@ const routes: Routes = [
       import('./pages/room/room.module').then((m) => m.RoomPageModule),
   },
   {
-    path: 'home/:id',
+    path: 'game/:id',
     loadChildren: () =>
-      import('./pages/home/home.module').then((m) => m.HomePageModule),
+      import('./pages/game/game.module').then((m) => m.GamePageModule),
   },
 ];
 

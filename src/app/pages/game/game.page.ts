@@ -4,12 +4,12 @@ import { ActivatedRoute } from '@angular/router';
 import { WebsocketService } from 'src/app/service/websocket.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.page.html',
-  styleUrls: ['./home.page.scss'],
+  selector: 'app-game',
+  templateUrl: './game.page.html',
+  styleUrls: ['./game.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnInit {
+export class GamePage implements OnInit {
   board: string[][] = [];
   players: { black: string; white: string } = {
     black: 'Black',
@@ -119,7 +119,7 @@ export class HomePage implements OnInit {
       this.board.forEach((row, r) => {
         row.forEach((cell, c) => {
           setTimeout(() => {
-            this.fadeStates[r][c] = false; // Remove fade-out
+            //this.fadeStates[r][c] = false; // Remove fade-out
           }, r * 100 + c * 50); // Stagger animations by row and column
         });
       });
@@ -138,7 +138,7 @@ export class HomePage implements OnInit {
         this.matchDone = false;
         this.finalWinner = null;
       }
-    }, 0); // Duration of fade-out
+    }, 400); // Duration of fade-out
   }
 
   resetBoard(fullReset: boolean) {
@@ -173,6 +173,6 @@ export class HomePage implements OnInit {
         col: c,
       });
       this.inProgress = false;
-    }, 100);
+    }, 5000);
   }
 }
