@@ -1,0 +1,12 @@
+{
+  "/api": {
+    "target": "http://192.168.178.125:8080/",
+    "secure": false,
+    "ws": true
+  },
+  "/orbitways-websocket": {
+    "target": "http://192.168.178.125:8080/",
+    "secure": false,
+    "ws": true
+  }
+}

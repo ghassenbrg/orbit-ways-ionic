@@ -7,7 +7,7 @@ ion-content {
   width: 90vw;
   height: 90vw;
   padding: 8vw;
-  background: url("../../assets/game/board-bg.png") no-repeat center center;
+  background: url("../../../assets/game/board-bg.png") no-repeat center center;
   background-size: contain;
 }
 
@@ -43,12 +43,12 @@ ion-content {
 }
 
 .B-ball {
-  background: url("../../assets/game/black_ball.png") no-repeat center center;
+  background: url("../../../assets/game/black_ball.png") no-repeat center center;
   background-size: contain;
 }
 
 .W-ball {
-  background: url("../../assets/game/white_ball.png") no-repeat center center;
+  background: url("../../../assets/game/white_ball.png") no-repeat center center;
   background-size: contain;
 }
 
