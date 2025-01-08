@@ -8,8 +8,15 @@
   <div class="container-bg">
     <!-- Main Card Container -->
     <div class="room-form">
-      <h2>Create or Join a Room</h2>
+      <h2 style="color: rgb(68, 85, 108);">Create or Join a Room</h2>
 
+      <!-- Instruction Message -->
+      <div class="instruction-message">
+        <p>
+          To join a game, all you need is a <strong>Room ID</strong> and to pick
+          a <strong>User ID</strong> ^^ !
+        </p>
+      </div>
       <!-- Room ID Input -->
       <ion-item lines="none" class="custom-item">
         <ion-label position="stacked">Room ID</ion-label>
@@ -42,7 +49,7 @@
 
       <!-- Color Selection -->
       <div class="color-select">
-        <label class="color-label">Choose Color:</label>
+        <label class="color-label"  style="color: rgb(55, 49, 42)">Choose Color:</label>
         <ion-segment mode="md" [(ngModel)]="chosenColor" class="color-segment">
           <ion-segment-button value="B">
             <ion-label class="choose-color" style="color: rgb(55, 49, 42)">
