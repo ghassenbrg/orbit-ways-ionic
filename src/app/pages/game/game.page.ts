@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WebsocketService } from 'src/app/service/websocket.service';
+import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({
@@ -103,7 +104,7 @@ export class GamePage implements OnInit {
     // Do an initial get to fetch the current game state
     this.http
       .get<any>(
-        `/api/game/get?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
+        `${environment.basePath}/api/game/get?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
       )
       .subscribe((game) => {
         this.handleGameState(game, true);

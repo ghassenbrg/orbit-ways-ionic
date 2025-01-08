@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-room',
@@ -27,7 +28,7 @@ export class RoomPage {
     // We pass hostId, hostColor, and maxScore to the backend
     this.http
       .post<any>(
-        `/api/game/create?roomId=${this.roomId}&hostId=${this.userId}&hostColor=${this.chosenColor}&maxScore=${this.maxScore}`,
+        `${environment.basePath}/api/game/create?roomId=${this.roomId}&hostId=${this.userId}&hostColor=${this.chosenColor}&maxScore=${this.maxScore}`,
         {}
       )
       .subscribe({
@@ -56,7 +57,7 @@ export class RoomPage {
     // We pass joinerId and joinerColor
     this.http
       .get<any>(
-        `/api/game/join?roomId=${this.roomId}&joinerId=${this.userId}&joinerColor=${this.chosenColor}`
+        `${environment.basePath}/api/game/join?roomId=${this.roomId}&joinerId=${this.userId}&joinerColor=${this.chosenColor}`
       )
       .subscribe({
         next: (game) => {

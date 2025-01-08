@@ -9,7 +9,7 @@
   <div class="popup-message-container" *ngIf="showPopup">
     <div class="popup-message">
       <h2>It seems a Kana player is here!</h2>
-      <p>If you're Yoshida Kana, I wanna say I love you 😊❤️✨</p>
+      <p>If you're Yoshida Kana, I wanna say I love you 😊💗✨</p>
       <button class="fun-button" (click)="dismissPopup()">
         Let's Have Fun!
       </button>
@@ -55,7 +55,7 @@
       <div class="info-item">
         <span class="label" style="margin-right: 0 !important"
           >{{players.black === this.myUserId ? 'You' : players.black}}
-          {{players.black.toLowerCase() === 'kana' ? '❤️' : ''}}
+          {{players.black.toLowerCase() === 'kana' ? '💗' : ''}}
           (</span
         >
         <div class="score-indicator player-black"></div>
@@ -65,7 +65,7 @@
       <div class="info-item">
         <span class="label" style="margin-right: 0 !important"
           >{{players.white === this.myUserId ? 'You': players.white}}
-          {{players.white.toLowerCase() === 'kana' ? '❤️' : ''}}
+          {{players.white.toLowerCase() === 'kana' ? '💗' : ''}}
           (</span
         >
         <div class="score-indicator player-white"></div>

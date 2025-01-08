@@ -3,6 +3,7 @@ import * as Stomp from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { StompSubscription } from '@stomp/stompjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class WebsocketService {
   constructor() {}
 
   connect() {
-    const socket = new SockJS('/orbitways-websocket');
+    const socket = new SockJS(`${environment.basePath}/orbitways-websocket`);
     this.stompClient = new Stomp.Client({
       webSocketFactory: () => socket,
       debug: (str) => console.log(str),

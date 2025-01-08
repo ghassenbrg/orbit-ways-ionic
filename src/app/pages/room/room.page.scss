@@ -96,3 +96,29 @@
   font-size: 1.1rem;
   font-weight: 600;
 }
+
+.score-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin: 0 5px;
+}
+
+.player-black {
+  background-color: #000;
+  background: url("../../../assets/game/black_ball.png") no-repeat center center;
+  background-size: contain;
+}
+
+.player-white {
+  background-color: #fff;
+  background: url("../../../assets/game/white_ball.png") no-repeat center center;
+  background-size: contain;
+}
+
+.choose-color {
+  display: flex;
+  align-items: center;
+  margin: 0.25rem 0;
+  justify-content: center;
+}

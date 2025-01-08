@@ -1,12 +1,18 @@
 {
-  "/api": {
+  "/orbitways/api/": {
     "target": "http://192.168.178.125:8080/",
     "secure": false,
-    "ws": true
+    "ws": true,
+    "pathRewrite": {
+      "^/orbitways/api": "api"
+    }
   },
-  "/orbitways-websocket": {
+  "/orbitways/orbitways-websocket/": {
     "target": "http://192.168.178.125:8080/",
     "secure": false,
-    "ws": true
+    "ws": true,
+    "pathRewrite": {
+      "^/orbitways/orbitways-websocket": "orbitways-websocket"
+    }
   }
 }
