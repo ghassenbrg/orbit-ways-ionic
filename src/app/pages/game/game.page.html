@@ -8,10 +8,12 @@
   <!-- Popup Message -->
   <div class="popup-message-container" *ngIf="showPopup">
     <div class="popup-message">
-      <h2>It seems a Kana player is here!</h2>
-      <p>If you're Yoshida Kana, I wanna say I love you 😊💗✨</p>
+      <h2>Yoshida Kana right! <br> 吉田香奈ちゃん、合ってるよね！</h2>
+      <h2></h2>
+      <p>Hello Sweetie, I love you 😊💗✨ <br> ねぇ、香奈、大好きだよ😊💗✨</p>
+      <p></p>
       <button class="fun-button" (click)="dismissPopup()">
-        Let's Have Fun!
+        Enjoy !
       </button>
     </div>
     <div class="black-bg"></div>
@@ -55,7 +57,7 @@
       <div class="info-item">
         <span class="label" style="margin-right: 0 !important"
           >{{players.black === this.myUserId ? 'You' : players.black}}
-          {{players.black.toLowerCase() === 'kana' ? '💗' : ''}}
+          {{players.black.toLowerCase() === 'babe25' ? '💗' : ''}}
           (</span
         >
         <div class="score-indicator player-black"></div>
@@ -65,7 +67,7 @@
       <div class="info-item">
         <span class="label" style="margin-right: 0 !important"
           >{{players.white === this.myUserId ? 'You': players.white}}
-          {{players.white.toLowerCase() === 'kana' ? '💗' : ''}}
+          {{players.white.toLowerCase() === 'babe25' ? '💗' : ''}}
           (</span
         >
         <div class="score-indicator player-white"></div>

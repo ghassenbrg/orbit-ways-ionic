@@ -103,9 +103,7 @@ export class GamePage implements OnInit {
 
     // Do an initial get to fetch the current game state
     this.http
-      .get<any>(
-        `${environment.basePath}/api/game/get?roomId=${this.roomId}&joinerId=${this.myUserId}&joinerColor=${this.myColor}`
-      )
+      .get<any>(`${environment.basePath}/api/game/get?roomId=${this.roomId}`)
       .subscribe((game) => {
         this.handleGameState(game, true);
         this.checkForKana();
@@ -268,7 +266,7 @@ export class GamePage implements OnInit {
   //--- kana message
   checkForKana() {
     // Compare ignoring case
-    if (this.myUserId.toLowerCase() === 'kana') {
+    if (this.myUserId.toLowerCase() === 'babe25') {
       this.showPopup = true;
     }
   }

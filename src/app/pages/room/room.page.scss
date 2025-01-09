@@ -1,5 +1,11 @@
-/* If using a custom font, e.g., Fredoka One, ensure it’s globally imported. */
+/* Import Fredoka One font globally */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+/* Apply the Fredoka One font-family globally */
+* {
+  font-family: 'Fredoka One', sans-serif !important;
+  box-sizing: border-box;
+}
 
 .container-bg {
   display: flex;
@@ -8,8 +14,6 @@
   height: 100%;
   padding: 1rem;
   background: linear-gradient(to bottom right, #f6caca, #8de5e4);
-  font-family: 'Fredoka One', sans-serif;
-  box-sizing: border-box;
 }
 
 /* The main card / form container */
@@ -36,7 +40,7 @@
   --border-radius: 10px;
 
   ion-label {
-    color: #333;
+    color: rgb(68, 85, 108);
     font-size: 1.1rem;
   }
 
@@ -60,7 +64,7 @@
   .color-segment {
     ion-segment-button {
       font-weight: 600;
-      --indicator-color: #fb8c00; /* The highlight under the selected segment */
+      --indicator-color: #d30a43; /* The highlight under the selected segment */
       --indicator-height: 4px;
       ion-label {
         color: #fff;
@@ -124,7 +128,6 @@
 }
 
 .instruction-message {
-  font-family: Arial, Helvetica, sans-serif;
   text-align: center;
   margin: 10px 0;
   font-size: 11px;

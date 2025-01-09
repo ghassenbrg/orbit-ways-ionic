@@ -8,80 +8,129 @@
   <div class="container-bg">
     <!-- Main Card Container -->
     <div class="room-form">
-      <h2 style="color: rgb(68, 85, 108);">Create or Join a Room</h2>
-
-      <!-- Instruction Message -->
-      <div class="instruction-message">
-        <p>
-          To join a game, all you need is a <strong>Room ID</strong> and to pick
-          a <strong>User ID</strong> ^^ !
-        </p>
-      </div>
-      <!-- Room ID Input -->
-      <ion-item lines="none" class="custom-item">
-        <ion-label position="stacked">Room ID</ion-label>
-        <ion-input
-          [(ngModel)]="roomId"
-          placeholder="e.g. 12345"
-          type="text"
-        ></ion-input>
-      </ion-item>
-
-      <!-- User ID Input -->
-      <ion-item lines="none" class="custom-item">
-        <ion-label position="stacked">User ID</ion-label>
-        <ion-input
-          [(ngModel)]="userId"
-          placeholder="e.g. alice123"
-          type="text"
-        ></ion-input>
-      </ion-item>
-
-      <!-- Rounds to Win -->
-      <ion-item lines="none" class="custom-item">
-        <ion-label position="stacked">Rounds to Win</ion-label>
-        <ion-input
-          [(ngModel)]="maxScore"
-          type="number"
-          placeholder="3"
-        ></ion-input>
-      </ion-item>
-
-      <!-- Color Selection -->
-      <div class="color-select">
-        <label class="color-label"  style="color: rgb(55, 49, 42)">Choose Color:</label>
-        <ion-segment mode="md" [(ngModel)]="chosenColor" class="color-segment">
-          <ion-segment-button value="B">
-            <ion-label class="choose-color" style="color: rgb(55, 49, 42)">
-              <div class="score-indicator player-black"></div>
-              <span>BLACK</span>
-            </ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="W">
-            <ion-label class="choose-color" style="color: rgb(55, 49, 42)">
-              <div class="score-indicator player-white"></div>
-              <span>WHITE</span>
-            </ion-label>
-          </ion-segment-button>
-        </ion-segment>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="button-row">
+      <h2 style="color: rgb(68, 85, 108)">
+        {{(chosenAction === 'CREATE' || !chosenAction ? 'Create ' : '') +
+        (!chosenAction ? 'or ' : '') + (chosenAction === 'JOIN' || !chosenAction
+        ? 'Join a ' : '') + 'Room'}}
+      </h2>
+      <!-- choose action -->
+      <div class="button-row" *ngIf="!chosenAction">
         <ion-button
-          (click)="createRoom()"
+          (click)="chooseAction('CREATE')"
           class="cartoon-button"
           color="primary"
         >
-          Create Room
+          <span style="color: #152b50">Create Room</span>
         </ion-button>
         <ion-button
-          (click)="joinRoom()"
+          (click)="chooseAction('JOIN')"
           class="cartoon-button"
           color="tertiary"
         >
-          Join Room
+          <span style="color: #36266a">Join Room</span>
         </ion-button>
+      </div>
+
+      <div *ngIf="chosenAction">
+        <!-- Room ID Input -->
+        <ion-item lines="none" class="custom-item">
+          <ion-label position="stacked">
+            <span>Room ID</span>
+          </ion-label>
+          <ion-input
+            [(ngModel)]="roomId"
+            placeholder="e.g. 12345"
+            type="text"
+          ></ion-input>
+        </ion-item>
+
+        <!-- User ID Input -->
+        <ion-item lines="none" class="custom-item">
+          <ion-label position="stacked">User ID</ion-label>
+          <ion-input
+            [(ngModel)]="userId"
+            placeholder="e.g. alice123"
+            type="text"
+          ></ion-input>
+        </ion-item>
+
+        <!-- Rounds to Win -->
+        <ion-item
+          lines="none"
+          class="custom-item"
+          *ngIf="chosenAction == 'CREATE'"
+        >
+          <ion-label position="stacked">Rounds to Win</ion-label>
+          <ion-input
+            [(ngModel)]="maxScore"
+            type="number"
+            placeholder="3"
+          ></ion-input>
+        </ion-item>
+
+        <!-- Color Selection -->
+        <div class="color-select" *ngIf="chosenAction == 'CREATE'">
+          <label class="color-label" style="color: rgb(68, 85, 108)"
+            >Choose Color:</label
+          >
+          <ion-segment
+            mode="md"
+            [(ngModel)]="chosenColor"
+            class="color-segment"
+          >
+            <ion-segment-button value="B">
+              <ion-label class="choose-color" style="color: rgb(68, 85, 108)">
+                <div class="score-indicator player-black"></div>
+                <span>BLACK</span>
+              </ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="W">
+              <ion-label class="choose-color" style="color: rgb(68, 85, 108)">
+                <div class="score-indicator player-white"></div>
+                <span>WHITE</span>
+              </ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+
+        <!-- Action Buttons -->
+        <div *ngIf="chosenAction == 'CREATE'">
+          <div>
+            <ion-button
+              (click)="createRoom()"
+              class="cartoon-button"
+              color="primary"
+            >
+              <span style="color: #152b50">Submit !</span>
+            </ion-button>
+          </div>
+          <ion-button
+            (click)="chooseAction('JOIN')"
+            class="cartoon-button"
+            color="tertiary"
+          >
+            <span style="color: #36266a">Join Room</span>
+          </ion-button>
+        </div>
+
+        <div *ngIf="chosenAction == 'JOIN'">
+          <div>
+            <ion-button
+              (click)="joinRoom()"
+              class="cartoon-button"
+              color="tertiary"
+            >
+              <span style="color: #36266a">Submit !</span>
+            </ion-button>
+          </div>
+          <ion-button
+            (click)="chooseAction('CREATE')"
+            class="cartoon-button"
+            color="primary"
+          >
+            <span style="color: #152b50">Create Room</span>
+          </ion-button>
+        </div>
       </div>
 
       <!-- Error / Info Message -->
