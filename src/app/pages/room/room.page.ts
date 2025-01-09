@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -7,16 +7,21 @@ import { environment } from 'src/environments/environment';
   selector: 'app-room',
   templateUrl: './room.page.html',
   styleUrls: ['./room.page.scss'],
-  standalone: false
+  standalone: false,
 })
-export class RoomPage {
+export class RoomPage implements OnInit {
   roomId: string = '';
   userId: string = '';
-  maxScore: number = 3;   // new field
+  maxScore: number = 3; // new field
   chosenColor: string = 'B'; // default
   errorMessage: string = '';
+  roomIdGenerated: string = '';
 
   constructor(private router: Router, private http: HttpClient) {}
+  
+  ngOnInit(): void {
+    this.generateRoomID();
+  }
 
   createRoom() {
     this.errorMessage = '';
@@ -43,7 +48,7 @@ export class RoomPage {
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Error creating room.';
-        }
+        },
       });
   }
 
@@ -80,11 +85,48 @@ export class RoomPage {
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Error joining room.';
-        }
+        },
       });
   }
 
   goToGame() {
     this.router.navigate(['/game', this.roomId]);
   }
+
+  chosenAction: 'CREATE' | 'JOIN' | null = null;
+
+  chooseAction(action: 'CREATE' | 'JOIN' | null) {
+    this.chosenAction = action;
+    if(!this.roomId || this.roomId === this.roomIdGenerated)
+    this.roomId = action === 'CREATE' ? this.roomIdGenerated : '';
+  }
+
+  generateRoomID() {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let roomIdGenerated = '';
+
+    // Generate a 5-character room ID
+    for (let i = 0; i < 5; i++) {
+      roomIdGenerated += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // Check if the room ID is new
+    this.http
+      .get<any>(
+        `${environment.basePath}/api/game/get?roomId=${roomIdGenerated}`
+      )
+      .subscribe(
+        (game) => {
+          // If the room exists, recursively call the function to generate a new one
+          this.generateRoomID();
+        },
+        (err) => {
+          // If an error occurs (room ID does not exist), set the new room ID
+          this.roomIdGenerated = roomIdGenerated;
+          this.roomId = this.roomIdGenerated;
+        }
+      );
+  }
+
 }
