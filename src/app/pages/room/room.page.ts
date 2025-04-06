@@ -25,6 +25,10 @@ export class RoomPage implements OnInit {
     this.generateRoomID();
   }
 
+  setChosenColor(color: string) {
+    this.chosenColor = color;
+  }
+
   createRoom() {
     this.errorMessage = '';
     if (!this.roomId || !this.userId) {

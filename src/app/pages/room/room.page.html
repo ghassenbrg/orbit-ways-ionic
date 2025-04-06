@@ -1,97 +1,126 @@
-  <ion-content fullscreen>
-    <div class="background-stars">
-      <h1>ORBIT WAYS</h1>
-      <div class="container"  *ngIf="!chosenAction">
-        <div class="button-box">
-          <button class="custom-btn create"  (click)="chooseAction('CREATE')">
-            Create Room
-          </button>
-          <button class="custom-btn join"  (click)="chooseAction('JOIN')">Join Room</button>
-        </div>
-      </div>
-
-      <div class="container"  *ngIf="chosenAction">
-        <div
-          class="button-box"
-          style="
-            gap: 1.5rem;
-            padding: 2.5rem 2rem;
-            width: 90vw;
-            max-width: 420px;
-          "
-        >
-          <h2
-            style="
-              font-size: 2.25rem;
-              color: #ffefd5;
-              font-weight: 800;
-              margin-bottom: 0.5rem;
-            "
-            
-          >
-            <span  *ngIf="chosenAction === 'CREATE'">Create Room</span>
-            <span  *ngIf="chosenAction === 'JOIN'">Join Room</span>
-          </h2>
-
-          <div style="text-align: left; width: 100%">
-            <label style="color: #ffefd5; font-weight: 600; font-size: 1rem"
-              >Room ID</label
-            >
-            <input type="text" placeholder="e.g. RnK5a" [(ngModel)]="roomId"  class="custom-input" />
-          </div>
-
-          <div style="text-align: left; width: 100%">
-            <label style="color: #ffefd5; font-weight: 600; font-size: 1rem"
-              >User ID</label
-            >
-            <input
-              type="text"
-              placeholder="e.g. alice123"
-              [(ngModel)]="userId" 
-              class="custom-input"
-            />
-          </div>
-
-          <div style="text-align: left; width: 100%" *ngIf="chosenAction === 'CREATE'">
-            <label style="color: #ffefd5; font-weight: 600; font-size: 1rem"
-              >Rounds to Win</label
-            >
-            <input type="number" min="1" [(ngModel)]="maxScore" class="custom-input" />
-          </div>
-
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 0.75rem;
-              margin-top: 0.5rem;
-            "
-          >
-          <!-- [(ngModel)]="chosenColor"  -->
-            <img class="character-icon" src="assets/icon/planet.png" />
-            <img class="character-icon" src="assets/icon/rocket.png" />
-            <img class="character-icon" src="assets/icon/alien.png" />
-            <img class="character-icon" src="assets/icon/astronaut.png" />
-          </div>
-
-          <button
-            class="custom-btn"
-            style="
-              background: linear-gradient(to right, #3b82f6, #60a5fa);
-              border-radius: 2rem;
-            "
-            (click)="submit()"
-          >
-            SUBMIT!
-          </button>
-          <button  *ngIf="chosenAction === 'CREATE'" class="custom-btn create" (click)="chooseAction('JOIN')">
-            JOIN ROOM
-          </button>
-          <button  *ngIf="chosenAction === 'JOIN'" class="custom-btn create" (click)="chooseAction('CREATE')">
-            CREATE ROOM
-          </button>
-        </div>
+<ion-content fullscreen>
+  <div class="background-stars">
+    <h1>ORBIT WAYS</h1>
+    <div class="container" *ngIf="!chosenAction">
+      <div class="button-box">
+        <button class="custom-btn create" (click)="chooseAction('CREATE')">
+          Create Room
+        </button>
+        <button class="custom-btn join" (click)="chooseAction('JOIN')">
+          Join Room
+        </button>
       </div>
     </div>
-  </ion-content>
+
+    <div class="container" *ngIf="chosenAction">
+      <div
+        class="button-box"
+        style="gap: 1.5rem; padding: 2.5rem 2rem; width: 90vw; max-width: 420px"
+      >
+        <h2
+          style="
+            font-size: 2.25rem;
+            color: #ffefd5;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+          "
+        >
+          <span *ngIf="chosenAction === 'CREATE'">Create Room</span>
+          <span *ngIf="chosenAction === 'JOIN'">Join Room</span>
+        </h2>
+
+        <div style="text-align: left; width: 100%">
+          <label style="color: #ffefd5; font-weight: 600; font-size: 1rem"
+            >Room ID</label
+          >
+          <input
+            type="text"
+            placeholder="e.g. RnK5a"
+            [(ngModel)]="roomId"
+            class="custom-input"
+          />
+        </div>
+
+        <div style="text-align: left; width: 100%">
+          <label style="color: #ffefd5; font-weight: 600; font-size: 1rem"
+            >User ID</label
+          >
+          <input
+            type="text"
+            placeholder="e.g. alice123"
+            [(ngModel)]="userId"
+            class="custom-input"
+          />
+        </div>
+
+        <div
+          style="text-align: left; width: 100%"
+          *ngIf="chosenAction === 'CREATE'"
+        >
+          <label style="color: #ffefd5; font-weight: 600; font-size: 1rem"
+            >Rounds to Win</label
+          >
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="maxScore"
+            class="custom-input"
+          />
+        </div>
+
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+          "
+        >
+          <!-- [(ngModel)]="chosenColor"  -->
+          <img
+            class="character-icon"
+            [ngClass]="{'character-selected': chosenColor === 'B'}"
+            (click)="setChosenColor('B')"
+            src="assets/icon/rocket.png"
+          />
+          <!--
+            <img class="character-icon" src="assets/icon/planet.png" />
+            <img class="character-icon" src="assets/icon/alien.png" />
+            -->
+          <img
+            class="character-icon"
+            [ngClass]="{'character-selected': chosenColor === 'W'}"
+            (click)="setChosenColor('W')"
+            src="assets/icon/astronaut.png"
+          />
+        </div>
+
+        <button
+          class="custom-btn"
+          style="
+            background: linear-gradient(to right, #3b82f6, #60a5fa);
+            border-radius: 2rem;
+          "
+          (click)="submit()"
+        >
+          SUBMIT!
+        </button>
+        <button
+          *ngIf="chosenAction === 'CREATE'"
+          class="custom-btn create"
+          (click)="chooseAction('JOIN')"
+        >
+          JOIN ROOM
+        </button>
+        <button
+          *ngIf="chosenAction === 'JOIN'"
+          class="custom-btn create"
+          (click)="chooseAction('CREATE')"
+        >
+          CREATE ROOM
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>
