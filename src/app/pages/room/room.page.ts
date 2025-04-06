@@ -1,6 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -10,6 +10,8 @@ import { environment } from 'src/environments/environment';
   standalone: false,
 })
 export class RoomPage implements OnInit {
+  showCreateRoom = true;
+
   roomId: string = '';
   userId: string = '';
   maxScore: number = 3; // new field
@@ -18,7 +20,7 @@ export class RoomPage implements OnInit {
   roomIdGenerated: string = '';
 
   constructor(private router: Router, private http: HttpClient) {}
-  
+
   ngOnInit(): void {
     this.generateRoomID();
   }
@@ -90,15 +92,15 @@ export class RoomPage implements OnInit {
   }
 
   goToGame() {
-    this.router.navigate(['/game', this.roomId]);
+    this.router.navigate(['/game', this.roomId], { replaceUrl: true });
   }
 
   chosenAction: 'CREATE' | 'JOIN' | null = null;
 
   chooseAction(action: 'CREATE' | 'JOIN' | null) {
     this.chosenAction = action;
-    if(!this.roomId || this.roomId === this.roomIdGenerated)
-    this.roomId = action === 'CREATE' ? this.roomIdGenerated : '';
+    if (!this.roomId || this.roomId === this.roomIdGenerated)
+      this.roomId = action === 'CREATE' ? this.roomIdGenerated : '';
   }
 
   generateRoomID() {
@@ -129,4 +131,11 @@ export class RoomPage implements OnInit {
       );
   }
 
+  submit() {
+    if (this.chosenAction == 'CREATE') {
+      this.createRoom();
+    } else {
+      this.joinRoom();
+    }
+  }
 }
