@@ -1,58 +1,12 @@
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
-/* Core CSS required for Ionic components to work properly */
-@import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
-@import "@ionic/angular/css/normalize.css";
-@import "@ionic/angular/css/structure.css";
-@import "@ionic/angular/css/typography.css";
-@import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
-
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
-
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
-
-#background-content {
-  background: #00b3a5 !important;
-}
-
-ion-header {
-  display: none; // if you're not using it
-}
-
-//-------------------------
-/* room-page.component.css */
-
 :host {
   font-family: "Fredoka", "Comic Sans MS", cursive, sans-serif;
   background: radial-gradient(ellipse at bottom, #140d3c 0%, #0b0d27 100%);
-  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
 }
 
 .container {
@@ -61,6 +15,9 @@ ion-header {
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
+  min-height: 100vh;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
 }
 
 /* Title Styling */
@@ -101,75 +58,8 @@ p.description {
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
-}
-
-/* Button Styles */
-button.custom-btn {
-  width: 16rem;
-  font-size: 1.375rem;
-  font-weight: 700;
-  padding: 0.875rem;
-  border-radius: 2rem;
-  color: #fff8f5;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.25), 0 3px 6px rgba(0, 0, 0, 0.2);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
-}
-
-button.custom-btn:active {
-  transform: translateY(2px);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
-}
-
-button.create {
-  background: linear-gradient(to right, #f4415e, #ec4899);
-}
-
-button.create:hover {
-  background: linear-gradient(to right, #e11d48, #db2777);
-}
-
-button.join {
-  background: linear-gradient(to right, #8b5cf6, #7c3aed);
-}
-
-button.join:hover {
-  background: linear-gradient(to right, #7c3aed, #6d28d9);
-}
-
-.custom-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1.125rem;
-  background-color: transparent;
-  border: 2px solid #742f99;
-  border-radius: 1.5rem;
-  color: #ffefd5;
-  font-weight: 600;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 239, 213, 0.05);
-  appearance: textfield;
-}
-
-.custom-input[type="number"]::-webkit-inner-spin-button,
-.custom-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.custom-input::placeholder {
-  color: #b88be0;
-  opacity: 0.8;
-}
-
-.character-icon {
-  width: 56px;
-  height: 56px;
-  background-color: #2a0d45;
-  border: 2px solid #9f3cff;
-  border-radius: 9999px;
-  padding: 4px;
-  box-shadow: 0 0 10px rgba(159, 60, 255, 0.4);
+  width: 90vw;
+  max-width: 420px;
 }
 
 /* Background stars */
@@ -183,5 +73,8 @@ button.join:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100%;
+  min-height: 100vh;
+  width: 100%;
+  padding-bottom: 4rem;
+  box-sizing: border-box;
 }
