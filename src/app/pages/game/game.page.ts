@@ -12,6 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
   standalone: false,
 })
 export class GamePage implements OnInit {
+  Math = Math;
+
   boardclientId: string = '';
 
   board: string[][] = [];
@@ -64,7 +66,6 @@ export class GamePage implements OnInit {
 
   ngOnInit() {
     this.boardclientId = uuidv4();
-    console.log(this.boardclientId);
     // Read route param for room ID
     this.route.params.subscribe((params) => {
       this.roomId = params['id'];
@@ -115,7 +116,6 @@ export class GamePage implements OnInit {
       this.board = newState.board;
     }
 
-    console.log(newState);
     this.currentPlayer = newState.currentPlayer;
     this.maxScore = newState.maxScore;
     this.players.black = newState.playerBlack || 'Black';
@@ -152,7 +152,6 @@ export class GamePage implements OnInit {
   placeMarble(r: number, c: number, userId: string, serverMove?: boolean) {
     if (!serverMove) {
       if (!this.myTurn) {
-        console.log('Not your turn!');
         return;
       }
       if (
@@ -273,5 +272,9 @@ export class GamePage implements OnInit {
 
   dismissPopup() {
     this.showPopup = false;
+  }
+
+  get flatBoard(): string[] {
+    return this.board.reduce((acc, row) => acc.concat(row), []);
   }
 }

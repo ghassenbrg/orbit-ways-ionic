@@ -1,143 +1,129 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Orbit Ways</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <!-- Popup Message -->
+<ion-content fullscreen>
   <div class="popup-message-container" *ngIf="showPopup">
-    <div class="popup-message">
-      <h2>Yoshida Kana right! <br> 吉田香奈ちゃん、合ってるよね！</h2>
-      <h2></h2>
-      <p>Hello Sweetie, I love you 😊💗✨ <br> ねぇ、香奈、大好きだよ😊💗✨</p>
-      <p></p>
-      <button class="fun-button" (click)="dismissPopup()">
-        Enjoy !
+    <div class="black-bg"></div>
+    <div class="popup-message romantic-popup">
+      <h2>For My Sweet Kana 💖<br />吉田香奈ちゃんへ</h2>
+      <p>
+        You are the most beautiful star in my galaxy 🌌💫<br />香奈は僕の宇宙で一番輝いてる星だよ
+        ✨
+      </p>
+      <p>
+        Stay close, my heart beats your name 💗<br />ずっと一緒にいてね、僕の心は香奈の名前でドキドキしてる💓
+      </p>
+      <button class="fun-button" (click)="dismissPopup()">Love You!</button>
+    </div>
+  </div>
+
+  <div class="celebration-popup-container" *ngIf="gameOver && !matchDone">
+    <div class="black-bg"></div>
+    <div class="popup-message celebration-popup celebratory-style">
+      <h2 *ngIf="winner === 'B'">
+        🎉 {{ players.black }} is the Star Commander of this round! 🚀
+      </h2>
+      <h2 *ngIf="winner === 'W'">
+        🎉 {{ players.white }} just rocketed to victory! 🌠
+      </h2>
+      <h2 *ngIf="winner === null">🤝 It's a stellar tie! 🌌</h2>
+      <p>
+        Incredible energy, cosmic moves, and a hint of stardust! ✨ Let’s keep
+        flying! 🚀
+      </p>
+      <button
+        class="fun-button next-round-button bright-theme"
+        (click)="resetBoard(false)"
+      >
+        💫 Next Round!
       </button>
     </div>
-    <div class="black-bg"></div>
   </div>
 
   <div class="container-bg">
-    <!--
-    <span style="color: rgb(65, 65, 149);">{{'this.gameOver: ' + this.gameOver
-    + ' | this.matchDone: ' + this.matchDone
-    + ' | this.currentPlayer: ' + this.currentPlayer 
-    + ' | this.myColor: ' + this.myColor
-    + ' | this.inProgress: ' + this.inProgress }} </span>
-    -->
-    <!-- Current Player & Score Display -->
-    <div class="info-bar" [ngClass]="{ 'game-finished': matchDone }">
-      <div class="info-item current-player">
-        <!--
-        <span class="label">Current Player:</span>
-        <div
-          class="player-indicator"
-          [ngClass]="currentPlayer === 'B' ? 'player-black' : 'player-white'"
-        ></div>
-        <span
-          class="player-label"
-          [style]="{ color: currentPlayer === 'B' ? 'black' : 'white' }"
-        >
-          ({{ currentPlayer === 'B' ? 'Black' : 'White'}})
-        </span>
-        -->
-        <!-- Show if it's MY turn or not -->
-        <span *ngIf="myTurn; else noTurn" class="turn-label turn-active">
-          It's your turn!
-        </span>
-        <ng-template #noTurn>
-          <span class="turn-label turn-waiting"> Waiting... </span>
-        </ng-template>
-      </div>
+    <h1 class="game-title">ORBIT WAYS</h1>
 
-      <hr />
+    <div class="game-box styled-border">
+      <div class="info-bar info-boxed">
+        <div class="player-info player-left">
+          <div class="avatar-frame green-glow">
+            <img
+              src="assets/icon/rocket.png"
+              alt="Planet"
+              class="avatar-icon"
+            />
+          </div>
+          <div class="player-meta">
+            <div class="player-name">
+              {{ players.black === myUserId ? 'You' : players.black }}
+            </div>
+            <div class="wins">{{ score.B }}/{{ maxScore }} Wins</div>
+          </div>
+        </div>
 
-      <div class="info-item">
-        <span class="label" style="margin-right: 0 !important"
-          >{{players.black === this.myUserId ? 'You' : players.black}}
-          {{players.black.toLowerCase() === 'babe25' ? '💗' : ''}}
-          (</span
-        >
-        <div class="score-indicator player-black"></div>
-        <span class="label">) :</span>
-        <span class="score">{{ score.B + '/' + maxScore }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label" style="margin-right: 0 !important"
-          >{{players.white === this.myUserId ? 'You': players.white}}
-          {{players.white.toLowerCase() === 'babe25' ? '💗' : ''}}
-          (</span
-        >
-        <div class="score-indicator player-white"></div>
-        <span class="label">) :</span>
-        <span class="score">{{ score.W + '/' + maxScore }}</span>
-      </div>
-
-      <hr />
-    </div>
-
-    <!-- Board Area -->
-    <div class="board-container">
-      <div class="board-grid" [class.ring-rotating]="isRotating">
-        <div class="board-row" *ngFor="let row of board; let r = index">
-          <div
-            class="board-cell"
-            *ngFor="let cell of row; let c = index"
-            [attr.data-row]="r"
-            [attr.data-col]="c"
-            [ngClass]="{
-    'rotate-180': arrowDirectionGrid['rotate-180'].includes(r + '' + c),
-    'rotate-90': arrowDirectionGrid['rotate-90'].includes(r + '' + c),
-    'rotate--90': arrowDirectionGrid['rotate--90'].includes(r + '' + c),
-    'rotate-0': arrowDirectionGrid['rotate-0'].includes(r + '' + c)
-  }"
-            (click)="placeMarble(r, c, myUserId)"
-          >
-            <div
-              [ngClass]="{
-    'cell-black': cell === 'B',
-    'cell-white': cell === 'W'
-  }"
-            ></div>
+        <div class="player-info player-right">
+          <div class="avatar-frame pink-glow">
+            <img src="assets/icon/astronaut.png" alt="Alien" class="avatar-icon" />
+          </div>
+          <div class="player-meta">
+            <div class="player-name">
+              {{ players.white === myUserId ? 'You' : players.white }}
+            </div>
+            <div class="wins">{{ score.W }}/{{ maxScore }} Wins</div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Result / Game Over for this Round -->
-    <div class="result-board" *ngIf="gameOver && !matchDone">
-      <div *ngIf="winner === 'B'" class="winner-panel black-winner">
-        {{players.black}} wins this round!!
-      </div>
-      <div *ngIf="winner === 'W'" class="winner-panel white-winner">
-        {{players.white}} wins this round!!
-      </div>
-      <div *ngIf="winner === null" class="winner-panel tie-winner">
-        It’s a tie !!
-      </div>
-      <button class="round-button" (click)="resetBoard(false)">
-        Next Round !
-      </button>
-    </div>
 
-    <!-- Match Done -->
-    <div class="result-board match-done" *ngIf="matchDone">
       <div
-        class="winner-panel final-winner"
-        [ngClass]="{
-        'black-winner': finalWinner === 'B',
-        'white-winner': finalWinner === 'W'
-      }"
+        class="turn-indicator-pill"
+        [ngClass]="{ 'waiting': !myTurn }"
+        *ngIf="!matchDone"
       >
-        {{ finalWinner === 'B' ? players.black : players.white }} wins the
-        match!!
+        {{ myTurn ? 'Your Turn!' : 'Waiting...' }}
       </div>
-    </div>
 
-    <div class="button-container">
-      <button class="reset-button" (click)="resetBoard(true)">Reset</button>
-      <button class="quit-button" (click)="quit()">Quit</button>
+      <div class="board-box">
+        <div class="board-grid ring-border" [class.ring-rotating]="isRotating">
+          <div class="board-row" *ngFor="let row of board; let r = index">
+            <div
+              class="board-cell"
+              *ngFor="let cell of row; let c = index"
+              [attr.data-row]="r"
+              [attr.data-col]="c"
+              [ngClass]="{
+                'rotate-180': arrowDirectionGrid['rotate-180'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
+                'rotate-90': arrowDirectionGrid['rotate-90'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
+                'rotate--90': arrowDirectionGrid['rotate--90'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
+                'rotate-0': arrowDirectionGrid['rotate-0'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
+                'cell-black': cell === 'B',
+                'cell-white': cell === 'W'
+              }"
+              (click)="placeMarble(r, c, myUserId)"
+            >
+              <span class="arrow unified-arrow">➤</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="round-info">
+        Round {{ score.B + score.W + 1 }} / {{ maxScore }}
+      </div>
+
+      <div class="result-board match-done" *ngIf="matchDone">
+        <div
+          class="winner-panel final-winner celebrative"
+          [ngClass]="{
+            'black-winner': finalWinner === 'B',
+            'white-winner': finalWinner === 'W'
+          }"
+        >
+          🏆 {{ finalWinner === 'B' ? players.black : players.white }} wins the
+          match!! 🏆
+        </div>
+      </div>
+
+      <div class="button-container">
+        <button class="reset-button" (click)="resetBoard(true)">Reset</button>
+        <button class="quit-button" (click)="quit()">Quit</button>
+      </div>
     </div>
   </div>
 </ion-content>
