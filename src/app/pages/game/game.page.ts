@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import JSConfetti from 'js-confetti';
 import { WebsocketService } from 'src/app/service/websocket.service';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,6 +49,9 @@ export class GamePage implements OnInit {
   maxScore: any;
   showPopup: boolean = false;
 
+  winnerConfetti: JSConfetti | null = null;
+  loserConfetti: JSConfetti | null = null;
+
   get myTurn(): boolean {
     return (
       !this.gameOver &&
@@ -65,6 +69,9 @@ export class GamePage implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.winnerConfetti = new JSConfetti();
+    this.loserConfetti = new JSConfetti();
+
     this.boardclientId = uuidv4();
     // Read route param for room ID
     /* this.route.params.subscribe((params) => {
@@ -139,9 +146,22 @@ export class GamePage implements OnInit {
       this.matchDone = false;
       this.finalWinner = null;
     }
+
+    if (this.winner !== null || this.finalWinner !== null) {
+      if (
+        (!this.matchDone && this.gameOver && this.winner === this.myColor) ||
+        (this.matchDone && this.finalWinner === this.myColor)
+      ) {
+        this.triggerWinnerAnimation();
+      } else {
+        this.triggerLoserAnimation();
+      }
+    }
   }
 
   resetBoard(fullReset: boolean) {
+    this.winnerConfetti?.clearCanvas();
+    this.loserConfetti?.clearCanvas();
     this.wsService.send('/app/resetGame', {
       roomId: this.roomId,
       fullReset: fullReset,
@@ -292,5 +312,40 @@ export class GamePage implements OnInit {
         console.log('Room ID copied to clipboard!');
       });
     }
+  }
+
+  triggerWinnerAnimation() {
+    this.winnerConfetti?.addConfetti({
+      emojis: [
+        '🎊',
+        '✨',
+        '💫',
+        '🌟',
+        '🌈',
+        '🪐',
+        '🌠',
+        '💥',
+        '🎯',
+        '🧨',
+        '🍬',
+        '🍭',
+        '🪅',
+        '🧃',
+        '🎮',
+        '🧸',
+      ],
+      emojiSize: 25,
+      confettiNumber: 300,
+    });
+  }
+
+  triggerLoserAnimation() {
+    this.loserConfetti?.addConfetti({
+      emojis: ['💀', '☠️', '🦴', '🪦', '⚰️', '👻', '😵‍💫'],
+      emojiSize: 100,
+      confettiNumber: 50, // fewer particles for subtlety
+      confettiColors: ['#444', '#555', '#666', '#777'], // dark, faded
+      // only supported keys used here
+    });
   }
 }
