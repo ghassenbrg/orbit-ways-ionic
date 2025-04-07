@@ -14,29 +14,6 @@
     </div>
   </div>
 
-  <div class="celebration-popup-container" *ngIf="gameOver && !matchDone">
-    <div class="black-bg"></div>
-    <div class="popup-message celebration-popup celebratory-style">
-      <h2 *ngIf="winner === 'B'">
-        🎉 {{ players.black }} is the Star Commander of this round! 🚀
-      </h2>
-      <h2 *ngIf="winner === 'W'">
-        🎉 {{ players.white }} just rocketed to victory! 🌠
-      </h2>
-      <h2 *ngIf="winner === null">🤝 It's a stellar tie! 🌌</h2>
-      <p>
-        Incredible energy, cosmic moves, and a hint of stardust! ✨ Let’s keep
-        flying! 🚀
-      </p>
-      <button
-        class="fun-button next-round-button bright-theme"
-        (click)="resetBoard(false)"
-      >
-        💫 Next Round!
-      </button>
-    </div>
-  </div>
-
   <div class="container-bg">
     <h1 class="game-title">ORBIT WAYS</h1>
 
@@ -60,7 +37,11 @@
 
         <div class="player-info player-right">
           <div class="avatar-frame pink-glow">
-            <img src="assets/icon/astronaut.png" alt="Alien" class="avatar-icon" />
+            <img
+              src="assets/icon/astronaut.png"
+              alt="Alien"
+              class="avatar-icon"
+            />
           </div>
           <div class="player-meta">
             <div class="player-name">
@@ -78,6 +59,14 @@
       >
         {{ myTurn ? 'Your Turn!' : 'Waiting...' }}
       </div>
+
+      <button
+        *ngIf="gameOver && !matchDone"
+        class="next-round-button"
+        (click)="resetBoard(false)"
+      >
+        💫 Next Round!
+      </button>
 
       <div class="board-box">
         <div class="board-grid ring-border" [class.ring-rotating]="isRotating">
@@ -103,8 +92,34 @@
         </div>
       </div>
 
-      <div class="round-info">
-        Round {{ score.B + score.W + 1 }} / {{ maxScore }}
+      <div class="result-board" *ngIf="gameOver && !matchDone">
+        <div
+          class="winner-panel round-result"
+          [ngClass]="{
+            'black-winner': winner === 'B',
+            'white-winner': winner === 'W',
+            'tie-winner': winner === null
+          }"
+        >
+          <span *ngIf="winner === 'B'"
+            >🚀 <span class="player-black-win"> {{ players.black }} </span> won
+            this round!</span
+          >
+          <span *ngIf="winner === 'W'"
+            >🌠
+            <span class="player-black-win"> {{ players.white }} </span> claimed
+            the stars!</span
+          >
+          <span *ngIf="winner === null">🤝 It’s a stellar tie!</span>
+        </div>
+      </div>
+
+      <div class="round-info copy-room-id">
+        Room ID:
+        <span class="room-code" (click)="copyRoomId()" title="Click to copy">
+          {{ roomId }}
+          <ion-icon name="copy-outline" class="copy-icon"></ion-icon>
+        </span>
       </div>
 
       <div class="result-board match-done" *ngIf="matchDone">

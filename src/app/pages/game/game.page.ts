@@ -76,7 +76,7 @@ export class GamePage implements OnInit {
     this.roomId = localStorage.getItem('roomId') || '';
     const color = localStorage.getItem('myColor');
     this.myColor = color === 'W' ? 'W' : 'B';
-    if(!this.myUserId || !this.roomId) {
+    if (!this.myUserId || !this.roomId) {
       this.quit();
     }
 
@@ -284,5 +284,13 @@ export class GamePage implements OnInit {
 
   get flatBoard(): string[] {
     return this.board.reduce((acc, row) => acc.concat(row), []);
+  }
+
+  copyRoomId() {
+    if (navigator.clipboard && this.roomId) {
+      navigator.clipboard.writeText(this.roomId).then(() => {
+        console.log('Room ID copied to clipboard!');
+      });
+    }
   }
 }

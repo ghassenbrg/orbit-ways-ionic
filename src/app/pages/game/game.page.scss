@@ -102,8 +102,15 @@
   -webkit-text-fill-color: transparent;
 }
 
-.player-right .player-name {
+.player-right .player-name,
+.player-white-win {
   background: linear-gradient(to right, #ff5dc0, #ff3d7f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.player-black-win {
+  background: linear-gradient(to right, #38f9d7, #00d2ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -375,6 +382,40 @@
   }
 }
 
+.copy-room-id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffefd5;
+  text-align: center;
+  margin-bottom: 0.5rem;
+
+  .room-code {
+    margin-left: 0.5rem;
+    background: #2a0d45;
+    padding: 0.25rem 0.6rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: bold;
+    color: #7cf3ff;
+    border: 1px solid #9f3cff;
+    box-shadow: 0 0 6px rgba(159, 60, 255, 0.3);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      background: #341a52;
+    }
+  }
+
+  .copy-icon {
+    font-size: 1.1rem;
+    color: #b883ff;
+  }
+}
+
 // New 'Next Round' button style
 .next-round-button {
   font-size: 1rem;
@@ -494,10 +535,33 @@
 }
 
 @keyframes floating-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 10px #fcd34d, 0 0 20px #a855f7;
   }
   50% {
     box-shadow: 0 0 30px #fcd34d, 0 0 50px #a855f7;
   }
+}
+
+/* Round Result styling - same base as final winner but distinct color/style */
+.result-board .round-result {
+  background: #1c0f30;
+  color: #ffeaea;
+  border-radius: 1.25rem;
+  border: 2px dashed #9f3cff;
+  box-shadow: 0 0 14px rgba(159, 60, 255, 0.3);
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+  text-align: center;
+  animation: popCelebration 1s ease-in-out;
+  margin-bottom: 0.75rem;
+}
+
+.result-board .round-result.tie-winner {
+  background: #ffd56f;
+  color: #372100;
+  border-color: #ffebc6;
+  box-shadow: 0 0 12px #fff1b5;
 }
