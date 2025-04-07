@@ -72,7 +72,6 @@ export class RoomPage implements OnInit {
       )
       .subscribe({
         next: (game) => {
-          console.log('Joined room', game);
           // Did the server auto-assign me a different color if chosen was taken?
           // Let's figure out if I'm black or white from the response:
           if (game.playerBlack === this.userId) {
@@ -96,7 +95,8 @@ export class RoomPage implements OnInit {
   }
 
   goToGame() {
-    this.router.navigate(['/game', this.roomId], { replaceUrl: true });
+    // this.router.navigate(['/game', this.roomId], { replaceUrl: true });
+    this.router.navigate(['/game'], { replaceUrl: true });
   }
 
   chosenAction: 'CREATE' | 'JOIN' | null = null;

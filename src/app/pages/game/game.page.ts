@@ -67,14 +67,18 @@ export class GamePage implements OnInit {
   ngOnInit() {
     this.boardclientId = uuidv4();
     // Read route param for room ID
-    this.route.params.subscribe((params) => {
+    /* this.route.params.subscribe((params) => {
       this.roomId = params['id'];
-    });
+    }); */
 
     // Read user info from localStorage
     this.myUserId = localStorage.getItem('myUserId') || '';
+    this.roomId = localStorage.getItem('roomId') || '';
     const color = localStorage.getItem('myColor');
     this.myColor = color === 'W' ? 'W' : 'B';
+    if(!this.myUserId || !this.roomId) {
+      this.quit();
+    }
 
     // Connect
     this.wsService.connect();
@@ -109,6 +113,10 @@ export class GamePage implements OnInit {
         this.handleGameState(game, true);
         this.checkForKana();
       });
+  }
+
+  ngOnDestroy(): void {
+    this.wsService.disconnect();
   }
 
   handleGameState(newState: any, updateBoard: boolean) {

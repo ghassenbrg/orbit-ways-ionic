@@ -16,6 +16,10 @@ export class WebsocketService {
   constructor() {}
 
   connect() {
+    if (this.stompClient && this.stompClient.active) {
+      this.stompClient.deactivate(); // Gracefully close previous connection
+    }
+
     const socket = new SockJS(`${environment.basePath}/orbitways-websocket`);
     this.stompClient = new Stomp.Client({
       webSocketFactory: () => socket,
@@ -29,6 +33,7 @@ export class WebsocketService {
         console.error('Details: ' + frame.body);
       }
     });
+
     this.stompClient.activate();
   }
 
@@ -65,10 +70,16 @@ export class WebsocketService {
   }
 
   disconnect() {
+    Object.keys(this.subscriptions).forEach((key) => {
+      this.unsubscribe(key);
+    });
+
     if (this.stompClient) {
       this.stompClient.deactivate();
       this.stompClient = null;
     }
+
     this.connected$.next(false);
   }
+
 }

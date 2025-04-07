@@ -13,7 +13,7 @@ const routes: Routes = [
       import('./pages/room/room.module').then((m) => m.RoomPageModule),
   },
   {
-    path: 'game/:id',
+    path: 'game',
     loadChildren: () =>
       import('./pages/game/game.module').then((m) => m.GamePageModule),
   },
