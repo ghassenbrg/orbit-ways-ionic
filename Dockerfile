@@ -6,6 +6,11 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# The lockfile is generated locally with npm 11, whose hoisting/dedup layout the
+# stock npm 10 in node:20-alpine rejects ("Missing: ... from lock file"). Pin the
+# build's npm to the same major so `npm ci` validates the committed lockfile.
+RUN npm install -g npm@11 --no-audit --no-fund
+
 # Install dependencies against the lockfile for reproducible builds.
 COPY package*.json ./
 RUN npm ci --prefer-offline --no-audit --no-fund

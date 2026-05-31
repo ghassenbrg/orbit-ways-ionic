@@ -1,0 +1,14 @@
+{
+  "/orbitways/api/": {
+    "target": "https://ghassen.io",
+    "secure": true,
+    "changeOrigin": true,
+    "ws": true
+  },
+  "/orbitways/orbitways-websocket/": {
+    "target": "https://ghassen.io",
+    "secure": true,
+    "changeOrigin": true,
+    "ws": true
+  }
+}
