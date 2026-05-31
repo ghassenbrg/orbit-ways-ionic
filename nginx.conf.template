@@ -1,0 +1,131 @@
+# nginx site config for orbit-ways-fe.
+#
+# Dropped into /etc/nginx/templates/ so the nginx:alpine entrypoint runs envsubst
+# over it (only ${NGINX_LOCAL_RESOLVERS} is substituted — that var is populated
+# from the pod's /etc/resolv.conf by the image's 15-local-resolvers entrypoint).
+#
+# The SPA is served same-origin under /orbitways/ (matches the production
+# baseHref). REST + STOMP/SockJS traffic is reverse-proxied to the orbit-ways-be
+# Service. Resolution is deferred to request time via the resolver + a variable
+# upstream, so nginx still boots if orbit-ways-be isn't up yet (returns 502
+# instead of crashlooping) and survives the Service IP changing.
+
+# WebSocket upgrade plumbing (http context).
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Resolve the backend Service at request time using the cluster DNS.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s;
+    set $orbit_be orbit-ways-be;
+
+    client_max_body_size 16M;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/json
+        application/javascript
+        application/xml+rss
+        application/atom+xml
+        image/svg+xml;
+
+    # Real client IP from Traefik
+    real_ip_header X-Forwarded-For;
+    set_real_ip_from 10.0.0.0/8;
+    set_real_ip_from 172.16.0.0/12;
+    set_real_ip_from 192.168.0.0/16;
+
+    # Security headers (compatible with Traefik). connect-src allows the
+    # same-origin STOMP/SockJS WebSocket used by Orbit Ways online play.
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss:; frame-ancestors 'self';" always;
+
+    # Health check endpoint for Traefik / container HEALTHCHECK.
+    location = /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+
+    # STOMP/SockJS WebSocket -> orbit-ways-be. Declared before /orbitways/api/
+    # so both the websocket and SockJS XHR-fallback transports land here. The
+    # rewrite strips the /orbitways prefix, mirroring proxy.config.json
+    # (^/orbitways/orbitways-websocket -> /orbitways-websocket).
+    location /orbitways/orbitways-websocket/ {
+        rewrite ^/orbitways/orbitways-websocket/(.*)$ /orbitways-websocket/$1 break;
+        proxy_pass http://$orbit_be:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+
+    # REST API -> orbit-ways-be. Rewrite maps /orbitways/api/<x> to /api/<x>,
+    # matching the dev proxy.
+    location /orbitways/api/ {
+        rewrite ^/orbitways/api/(.*)$ /api/$1 break;
+        proxy_pass http://$orbit_be:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SPA served under /orbitways/ (matches the production baseHref). Falls back
+    # to index.html so Angular client-side routes resolve on refresh.
+    location /orbitways/ {
+        alias /usr/share/nginx/html/;
+        try_files $uri $uri/ /orbitways/index.html;
+
+        # Cache fingerprinted static assets aggressively.
+        location ~* \.(?:js|css|png|jpe?g|gif|ico|svg|woff2?|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+            add_header Vary Accept-Encoding;
+        }
+    }
+
+    # Convenience redirect so the bare host lands on the app.
+    location = / {
+        return 302 /orbitways/;
+    }
+
+    # Deny hidden and backup files.
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    location ~ ~$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}

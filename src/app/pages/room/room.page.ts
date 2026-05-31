@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
+import { Subscription } from 'rxjs';
+import { GameConfigService } from 'src/app/service/game-config.service';
+import { GameEngineService } from 'src/app/service/game-engine.service';
+import { SettingsService } from 'src/app/service/settings.service';
+import { fieldBackground, hexA, Palette, shade, Side, TOKEN_SETS, TokenKey } from 'src/app/shared/theme';
+
+type LobbyMode = 'local' | 'create' | 'join';
 
 @Component({
   selector: 'app-room',
@@ -9,137 +15,183 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./room.page.scss'],
   standalone: false,
 })
-export class RoomPage implements OnInit {
-  showCreateRoom = true;
+export class RoomPage implements OnInit, OnDestroy {
+  // Visual state (from settings).
+  colors!: Palette;
+  tokens!: TokenKey;
+  starfield = true;
+  fieldBg = '';
 
-  roomId: string = '';
-  userId: string = '';
-  maxScore: number = 3; // new field
-  chosenColor: string = 'B'; // default
-  errorMessage: string = '';
-  roomIdGenerated: string = '';
+  // Lobby form state.
+  mode: LobbyMode | null = null;
+  name = '';
+  code = '';
+  rounds = 3;
+  side: Side = 'B';
+  genCode = '';
+  err = '';
+  busy = false;
 
-  constructor(private router: Router, private http: HttpClient) {}
+  readonly sides: Side[] = ['B', 'W'];
+
+  private sub?: Subscription;
+
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private settings: SettingsService,
+    private config: GameConfigService,
+    private engine: GameEngineService
+  ) {}
 
   ngOnInit(): void {
-    this.generateRoomID();
+    this.genCode = this.engine.randomRoomCode();
+    this.name = this.settings.value.lastName || '';
+    this.sub = this.settings.settings$.subscribe((s) => {
+      this.colors = this.settings.colors;
+      this.tokens = s.tokens;
+      this.starfield = s.starfield;
+      this.fieldBg = fieldBackground(this.colors);
+    });
   }
 
-  setChosenColor(color: string) {
-    this.chosenColor = color;
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
-  createRoom() {
-    this.errorMessage = '';
-    if (!this.roomId || !this.userId) {
-      this.errorMessage = 'Please fill in Room ID and User ID.';
+  // ── Mode selection ──────────────────────────────────────────────────────
+  choose(mode: LobbyMode): void {
+    this.mode = mode;
+    this.err = '';
+    if (mode === 'create') this.side = 'B';
+    if (mode === 'join') this.side = 'W';
+  }
+
+  back(): void {
+    this.mode = null;
+    this.err = '';
+  }
+
+  setSide(s: Side): void {
+    this.side = s;
+  }
+
+  get shadeB(): string {
+    return shade(this.colors.B, -0.4);
+  }
+
+  get ctaLabel(): string {
+    return this.mode === 'join' ? 'Join & play →' : "Let's play! →";
+  }
+
+  charBtnStyle(s: Side): Record<string, string> {
+    const on = this.side === s;
+    return {
+      background: hexA(this.colors[s], on ? 0.22 : 0.05),
+      border: `2.5px solid ${on ? this.colors[s] : hexA('#fff', 0.12)}`,
+      'box-shadow': on ? `0 4px 0 ${shade(this.colors[s], -0.45)}` : `0 3px 0 ${hexA('#000', 0.2)}`,
+    };
+  }
+
+  openSettings(): void {
+    this.router.navigate(['/settings']);
+  }
+
+  /** Label under a character pick button (e.g. "rocket", "astronaut"). */
+  sideLabel(s: Side): string {
+    const set = TOKEN_SETS[this.tokens];
+    if (!set) return s === 'B' ? 'P1' : 'P2';
+    return set[s].split('/').pop()!.replace('.png', '');
+  }
+
+  // ── Submit ──────────────────────────────────────────────────────────────
+  go(): void {
+    if (this.busy) return;
+    this.err = '';
+
+    if (this.mode === 'join' && this.code.trim().length < 3) {
+      this.err = 'Type a room code!';
       return;
     }
 
-    // We pass hostId, hostColor, and maxScore to the backend
+    const myName = this.name.trim() || (this.mode === 'join' ? 'Guest' : 'You');
+    this.settings.set({ lastName: this.name.trim() });
+
+    if (this.mode === 'local') {
+      this.startMatch('local', this.genCode, this.rounds, this.side, myName);
+      return;
+    }
+    if (this.mode === 'create') {
+      this.createRoom(myName);
+      return;
+    }
+    if (this.mode === 'join') {
+      this.joinRoom(myName);
+    }
+  }
+
+  private createRoom(myName: string): void {
+    this.busy = true;
+    const roomId = this.genCode;
     this.http
       .post<any>(
-        `${environment.basePath}/api/game/create?roomId=${this.roomId}&hostId=${this.userId}&hostColor=${this.chosenColor}&maxScore=${this.maxScore}`,
+        `${this.settings.apiBase()}/api/game/create?roomId=${roomId}&hostId=${encodeURIComponent(
+          myName
+        )}&hostColor=${this.side}&maxScore=${this.rounds}`,
         {}
       )
       .subscribe({
-        next: (game) => {
-          console.log('Room created', game);
-          // Store my info in localStorage
-          localStorage.setItem('myUserId', this.userId);
-          localStorage.setItem('myColor', this.chosenColor);
-          localStorage.setItem('roomId', this.roomId);
-          // Navigate to game page
-          this.goToGame();
-        },
-        error: (err) => {
-          this.errorMessage = err.error?.message || 'Error creating room.';
+        next: () => this.startMatch('online', roomId, this.rounds, this.side, myName),
+        error: (e) => {
+          this.busy = false;
+          this.err = e?.error?.message || 'Could not create the room.';
         },
       });
   }
 
-  joinRoom() {
-    this.errorMessage = '';
-    if (!this.roomId || !this.userId) {
-      this.errorMessage = 'Please fill in Room ID and User ID.';
-      return;
-    }
-
-    // We pass joinerId and joinerColor
+  private joinRoom(myName: string): void {
+    this.busy = true;
+    const roomId = this.code.trim().toUpperCase();
     this.http
       .get<any>(
-        `${environment.basePath}/api/game/join?roomId=${this.roomId}&joinerId=${this.userId}&joinerColor=${this.chosenColor}`
+        `${this.settings.apiBase()}/api/game/join?roomId=${roomId}&joinerId=${encodeURIComponent(
+          myName
+        )}&joinerColor=${this.side}`
       )
       .subscribe({
         next: (game) => {
-          // Did the server auto-assign me a different color if chosen was taken?
-          // Let's figure out if I'm black or white from the response:
-          if (game.playerBlack === this.userId) {
-            localStorage.setItem('myColor', 'B');
-          } else if (game.playerWhite === this.userId) {
-            localStorage.setItem('myColor', 'W');
-          } else {
-            // Not assigned => error or room full
-            this.errorMessage = 'Room is full or you could not join.';
+          let mySide: Side;
+          if (game.playerBlack === myName) mySide = 'B';
+          else if (game.playerWhite === myName) mySide = 'W';
+          else {
+            this.busy = false;
+            this.err = 'Room is full or you could not join.';
             return;
           }
-
-          localStorage.setItem('myUserId', this.userId);
-          localStorage.setItem('roomId', this.roomId);
-          this.goToGame();
+          this.startMatch('online', roomId, game.maxScore || this.rounds, mySide, myName);
         },
-        error: (err) => {
-          this.errorMessage = err.error?.message || 'Error joining room.';
+        error: (e) => {
+          this.busy = false;
+          this.err = e?.error?.message || 'Could not join the room.';
         },
       });
   }
 
-  goToGame() {
-    // this.router.navigate(['/game', this.roomId], { replaceUrl: true });
+  private async startMatch(
+    mode: 'local' | 'online',
+    roomCode: string,
+    maxScore: number,
+    mySide: Side,
+    myName: string
+  ): Promise<void> {
+    await this.config.start({
+      mode,
+      roomCode,
+      maxScore: Math.max(1, Math.min(9, maxScore)),
+      mySide,
+      myName,
+    });
+    this.busy = false;
     this.router.navigate(['/game'], { replaceUrl: true });
-  }
-
-  chosenAction: 'CREATE' | 'JOIN' | null = null;
-
-  chooseAction(action: 'CREATE' | 'JOIN' | null) {
-    this.chosenAction = action;
-    if (!this.roomId || this.roomId === this.roomIdGenerated)
-      this.roomId = action === 'CREATE' ? this.roomIdGenerated : '';
-  }
-
-  generateRoomID() {
-    const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let roomIdGenerated = '';
-
-    // Generate a 5-character room ID
-    for (let i = 0; i < 5; i++) {
-      roomIdGenerated += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    // Check if the room ID is new
-    this.http
-      .get<any>(
-        `${environment.basePath}/api/game/get?roomId=${roomIdGenerated}`
-      )
-      .subscribe(
-        (game) => {
-          // If the room exists, recursively call the function to generate a new one
-          this.generateRoomID();
-        },
-        (err) => {
-          // If an error occurs (room ID does not exist), set the new room ID
-          this.roomIdGenerated = roomIdGenerated;
-          this.roomId = this.roomIdGenerated;
-        }
-      );
-  }
-
-  submit() {
-    if (this.chosenAction == 'CREATE') {
-      this.createRoom();
-    } else {
-      this.joinRoom();
-    }
   }
 }

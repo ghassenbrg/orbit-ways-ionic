@@ -3,7 +3,7 @@ import * as Stomp from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { StompSubscription } from '@stomp/stompjs';
-import { environment } from 'src/environments/environment';
+import { SettingsService } from './settings.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,14 +13,16 @@ export class WebsocketService {
   private connected$ = new BehaviorSubject<boolean>(false);
   private subscriptions: { [key: string]: StompSubscription | null } = {};
 
-  constructor() {}
+  constructor(private settings: SettingsService) {}
 
   connect() {
     if (this.stompClient && this.stompClient.active) {
       this.stompClient.deactivate(); // Gracefully close previous connection
     }
 
-    const socket = new SockJS(`${environment.basePath}/orbitways-websocket`);
+    // Use the configured server URL (needed in the packaged iOS app, where the
+    // dev proxy doesn't exist) or fall back to the dev proxy base path.
+    const socket = new SockJS(`${this.settings.apiBase()}/orbitways-websocket`);
     this.stompClient = new Stomp.Client({
       webSocketFactory: () => socket,
       debug: (str) => console.log(str),

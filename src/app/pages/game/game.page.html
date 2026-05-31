@@ -1,143 +1,105 @@
-<ion-content fullscreen>
-  <div class="popup-message-container" *ngIf="showPopup">
-    <div class="black-bg"></div>
-    <div class="popup-message romantic-popup">
-      <h2>For My Sweet Kana 💖<br />吉田香奈ちゃんへ</h2>
-      <p>
-        You are the most beautiful star in my galaxy 🌌💫<br />香奈は僕の宇宙で一番輝いてる星だよ
-        ✨
-      </p>
-      <p>
-        Stay close, my heart beats your name 💗<br />ずっと一緒にいてね、僕の心は香奈の名前でドキドキしてる💓
-      </p>
-      <button class="fun-button" (click)="dismissPopup()">Love You!</button>
+<ion-content fullscreen class="ow-content">
+  <div class="ow-field" [style.background]="fieldBg">
+    <ow-starfield [show]="starfield"></ow-starfield>
+
+    <div class="ow-screen ow-game">
+      <!-- TOP HUD -->
+      <div class="ow-hud">
+        <div class="ow-hud-cards">
+          <div class="ow-pcard" [ngStyle]="playerCardStyle('B')">
+            <div class="ow-pcard-art" [class.ow-anim-wobble]="playerActive('B')">
+              <ow-piece side="B" [tokens]="tokens" [colors]="colors" [size]="42"></ow-piece>
+            </div>
+            <div class="ow-pcard-meta">
+              <div class="ow-pname">{{ players.B }}</div>
+              <ow-score-stars [n]="score.B" [max]="maxScore" [color]="colors.B"></ow-score-stars>
+            </div>
+          </div>
+
+          <div class="ow-pcard ow-pcard-right" [ngStyle]="playerCardStyle('W')">
+            <div class="ow-pcard-meta ow-meta-right">
+              <div class="ow-pname">{{ players.W }}</div>
+              <ow-score-stars [n]="score.W" [max]="maxScore" [color]="colors.W"></ow-score-stars>
+            </div>
+            <div class="ow-pcard-art" [class.ow-anim-wobble]="playerActive('W')">
+              <ow-piece side="W" [tokens]="tokens" [colors]="colors" [size]="42"></ow-piece>
+            </div>
+          </div>
+        </div>
+
+        <div class="ow-room" (click)="copyCode()">
+          <span class="ow-room-label">ROOM</span>
+          <span class="ow-room-code">{{ roomCode }}</span>
+          <span class="ow-room-copy">{{ copied ? '✓' : '⧉' }}</span>
+        </div>
+      </div>
+
+      <!-- STATUS LINE -->
+      <div class="ow-status">
+        <div *ngIf="phase === 'idle'" class="ow-turn-pill ow-anim-bob" [ngStyle]="turnPillStyle()">
+          <div class="ow-turn-art">
+            <ow-piece [side]="current" [tokens]="tokens" [colors]="colors" [size]="26"></ow-piece>
+          </div>
+          <span class="ow-turn-text">{{ players[current] }}<em>'s turn!</em></span>
+        </div>
+        <span *ngIf="phase === 'orbiting'" class="ow-status-msg">everything's spinning! 🌀</span>
+        <span *ngIf="phase === 'roundover'" class="ow-status-msg">round over!</span>
+      </div>
+
+      <!-- BOARD -->
+      <div class="ow-board-wrap">
+        <ow-board
+          [board]="board" [moves]="moves" [colors]="colors" [flowMode]="flowMode"
+          [tokens]="tokens" [winLines]="winLines" [current]="current"
+          [lastPlaced]="lastPlaced" [duration]="duration" [disabled]="boardDisabled"
+          (place)="place($event.r, $event.c)"></ow-board>
+        <ow-particle-burst *ngIf="burst && phase === 'roundover'" [color]="burst.color"></ow-particle-burst>
+      </div>
+
+      <!-- ROUND BANNER -->
+      <div class="ow-banner-slot">
+        <div *ngIf="phase === 'roundover'" class="ow-round-banner">
+          <div class="ow-round-pill ow-anim-pop" [ngStyle]="roundPillStyle()">
+            <div *ngIf="winner" class="ow-round-art">
+              <ow-piece [side]="winner" [tokens]="tokens" [colors]="colors" [size]="28"></ow-piece>
+            </div>
+            <span>{{ roundMsg }}</span>
+          </div>
+          <ow-candy-button [color]="roundColor" (press)="nextRound()">Next round →</ow-candy-button>
+        </div>
+      </div>
+
+      <!-- BOTTOM BAR -->
+      <div class="ow-bottom">
+        <button class="ow-ghost" (click)="resetMatch()">↻ Reset</button>
+        <button class="ow-ghost ow-ghost-quit" (click)="quit()">Quit</button>
+      </div>
     </div>
-  </div>
 
-  <div class="container-bg">
-    <h1 class="game-title">ORBIT WAYS</h1>
-
-    <div class="game-box styled-border">
-      <div class="info-bar info-boxed">
-        <div class="player-info player-left">
-          <div class="avatar-frame green-glow">
-            <img
-              src="assets/icon/rocket.png"
-              alt="Planet"
-              class="avatar-icon"
-            />
-          </div>
-          <div class="player-meta">
-            <div class="player-name">
-              {{ players.black === myUserId ? 'You' : players.black }}
-            </div>
-            <div class="wins">{{ score.B }}/{{ maxScore }} Wins</div>
-          </div>
+    <!-- MATCH OVERLAY -->
+    <div class="ow-match" *ngIf="phase === 'matchover' && winner" [ngStyle]="matchOverlayStyle()">
+      <ow-particle-burst [color]="colors[winner]" [big]="true" [n]="46"></ow-particle-burst>
+      <div class="ow-match-inner">
+        <div class="ow-match-art ow-anim-trophy">
+          <ow-piece [side]="winner" [tokens]="tokens" [colors]="colors" [size]="120"></ow-piece>
         </div>
-
-        <div class="player-info player-right">
-          <div class="avatar-frame pink-glow">
-            <img
-              src="assets/icon/astronaut.png"
-              alt="Alien"
-              class="avatar-icon"
-            />
-          </div>
-          <div class="player-meta">
-            <div class="player-name">
-              {{ players.white === myUserId ? 'You' : players.white }}
-            </div>
-            <div class="wins">{{ score.W }}/{{ maxScore }} Wins</div>
-          </div>
+        <div class="ow-match-titles">
+          <div class="ow-match-label">🏆 WINNER 🏆</div>
+          <div class="ow-match-name" [style.text-shadow]="'0 3px 0 ' + matchNameShadow">{{ players[winner] }}</div>
+        </div>
+        <div class="ow-match-btns">
+          <ow-candy-button [color]="colors[winner]" [big]="true" (press)="rematch()">Rematch</ow-candy-button>
+          <ow-candy-button color="#c9c6e0" [big]="true" (press)="quit()">Lobby</ow-candy-button>
         </div>
       </div>
+    </div>
 
-      <div
-        class="turn-indicator-pill"
-        [ngClass]="{ 'waiting': !myTurn }"
-        *ngIf="!matchDone"
-      >
-        {{ myTurn ? 'Your Turn!' : 'Waiting...' }}
-      </div>
-
-      <button
-        *ngIf="gameOver && !matchDone"
-        class="next-round-button"
-        (click)="resetBoard(false)"
-      >
-        💫 Next Round!
-      </button>
-
-      <div class="board-box">
-        <div class="board-grid ring-border" [class.ring-rotating]="isRotating">
-          <div class="board-row" *ngFor="let row of board; let r = index">
-            <div
-              class="board-cell"
-              *ngFor="let cell of row; let c = index"
-              [attr.data-row]="r"
-              [attr.data-col]="c"
-              [ngClass]="{
-                'rotate-180': arrowDirectionGrid['rotate-180'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
-                'rotate-90': arrowDirectionGrid['rotate-90'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
-                'rotate--90': arrowDirectionGrid['rotate--90'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
-                'rotate-0': arrowDirectionGrid['rotate-0'].includes(r + '' + c) && (cell != 'B' && cell !== 'W'),
-                'cell-black': cell === 'B',
-                'cell-white': cell === 'W'
-              }"
-              (click)="placeMarble(r, c, myUserId)"
-            >
-              <span class="arrow unified-arrow">➤</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="result-board" *ngIf="gameOver && !matchDone">
-        <div
-          class="winner-panel round-result"
-          [ngClass]="{
-            'black-winner': winner === 'B',
-            'white-winner': winner === 'W',
-            'tie-winner': winner === null
-          }"
-        >
-          <span *ngIf="winner === 'B'"
-            >🚀 <span class="player-black-win"> {{ players.black }} </span> won
-            this round!</span
-          >
-          <span *ngIf="winner === 'W'"
-            >🌠
-            <span class="player-white-win"> {{ players.white }} </span> claimed
-            the stars!</span
-          >
-          <span *ngIf="winner === null">🤝 It’s a stellar tie!</span>
-        </div>
-      </div>
-
-      <div class="round-info copy-room-id">
-        Room ID:
-        <span class="room-code" (click)="copyRoomId()" title="Click to copy">
-          {{ roomId }}
-          <ion-icon name="copy-outline" class="copy-icon"></ion-icon>
-        </span>
-      </div>
-
-      <div class="result-board match-done" *ngIf="matchDone">
-        <div
-          class="winner-panel final-winner celebrative"
-          [ngClass]="{
-            'black-winner': finalWinner === 'B',
-            'white-winner': finalWinner === 'W'
-          }"
-        >
-          🏆 {{ finalWinner === 'B' ? players.black : players.white }} wins the
-          match!! 🏆
-        </div>
-      </div>
-
-      <div class="button-container">
-        <button class="reset-button" (click)="resetBoard(true)">Reset</button>
-        <button class="quit-button" (click)="quit()">Quit</button>
+    <!-- KANA EASTER EGG -->
+    <div class="ow-kana" *ngIf="showKana" (click)="dismissKana()">
+      <div class="ow-kana-card ow-anim-pop" (click)="$event.stopPropagation()">
+        <div class="ow-kana-title">For My Sweet Kana 💖<br /><span>吉田香奈ちゃんへ</span></div>
+        <p>You are the most beautiful star in my galaxy 🌌💫<br />香奈は僕の宇宙で一番輝いてる星だよ ✨</p>
+        <ow-candy-button color="#ffffff" (press)="dismissKana()">Love you! 💗</ow-candy-button>
       </div>
     </div>
   </div>

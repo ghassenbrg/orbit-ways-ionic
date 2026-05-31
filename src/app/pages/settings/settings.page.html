@@ -1,0 +1,92 @@
+<ion-content fullscreen class="ow-content">
+  <div class="ow-field" [style.background]="fieldBg">
+    <ow-starfield [show]="s.starfield"></ow-starfield>
+
+    <div class="ow-screen ow-settings">
+      <!-- Header -->
+      <div class="ow-set-head">
+        <button class="ow-set-back" (click)="back()" aria-label="Back">
+          <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <h1>Tweaks</h1>
+      </div>
+
+      <!-- Live preview -->
+      <div class="ow-preview">
+        <div class="ow-preview-art">
+          <ow-piece side="B" [tokens]="s.tokens" [colors]="colors" [size]="56" [idle]="true"></ow-piece>
+          <ow-piece side="W" [tokens]="s.tokens" [colors]="colors" [size]="56" [idle]="true"></ow-piece>
+        </div>
+        <span>{{ tokenLabel(s.tokens) }} · {{ s.palette }}</span>
+      </div>
+
+      <!-- LOOK -->
+      <div class="ow-set-section">Look</div>
+
+      <div class="ow-set-row">
+        <label>Palette</label>
+        <div class="ow-palette-chips">
+          <button type="button" *ngFor="let p of paletteNames" class="ow-palette-chip"
+                  [ngStyle]="paletteChipStyle(p)" (click)="setPalette(p)" [attr.aria-label]="p">
+            <i [style.background]="paletteColors(p).B"></i>
+            <i [style.background]="paletteColors(p).W"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="ow-set-row">
+        <label>Characters</label>
+        <div class="ow-token-grid">
+          <button type="button" *ngFor="let k of tokenKeys" class="ow-token-card"
+                  [ngStyle]="tokenCardStyle(k)" (click)="setTokens(k)">
+            <div class="ow-token-pair">
+              <ow-piece side="B" [tokens]="k" [colors]="colors" [size]="34"></ow-piece>
+              <ow-piece side="W" [tokens]="k" [colors]="colors" [size]="34"></ow-piece>
+            </div>
+            <span>{{ tokenLabel(k) }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- BOARD -->
+      <div class="ow-set-section">Board</div>
+
+      <div class="ow-set-row">
+        <label>Flow arrows</label>
+        <ow-segmented [options]="flowOptions" [value]="s.flowMode" [color]="colors.B"
+                      (valueChange)="setFlow($event)"></ow-segmented>
+      </div>
+
+      <div class="ow-set-row ow-set-row-inline">
+        <label>Starfield</label>
+        <ow-toggle [value]="s.starfield" (valueChange)="setStarfield($event)"></ow-toggle>
+      </div>
+
+      <!-- MOTION -->
+      <div class="ow-set-section">Motion</div>
+
+      <div class="ow-set-row">
+        <label>Orbit speed</label>
+        <ow-segmented [options]="motionOptions" [value]="s.motion" [color]="colors.W"
+                      (valueChange)="setMotion($event)"></ow-segmented>
+      </div>
+
+      <!-- ONLINE -->
+      <div class="ow-set-section">Online play</div>
+
+      <div class="ow-set-row">
+        <label>Server URL</label>
+        <input class="ow-input" [ngModel]="s.serverUrl"
+               (ngModelChange)="setServerUrl($event)"
+               placeholder="https://your-server.com" inputmode="url"
+               autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <p class="ow-set-hint">
+          Needed to Create / Join rooms in the installed app. Leave blank to use
+          the built-in dev proxy in the browser.
+        </p>
+      </div>
+
+      <button class="ow-reset" (click)="resetAll()">Reset all tweaks</button>
+    </div>
+  </div>
+</ion-content>

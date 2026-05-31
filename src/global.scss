@@ -1,76 +1,67 @@
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
-
 /* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/display.css";
 
-/* Shared Input Style */
-.custom-input {
+/* ──────────────────────────────────────────────────────────────────────────
+   Orbit Ways — chunky mobile-game theme (recreated from the "Orbit Ways"
+   design bundle). Fredoka font is loaded in index.html.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --ow-font: "Fredoka", system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--ow-font);
+  background: #0b0820;
+}
+
+ion-content.ow-content {
+  --background: #0b0820;
+  font-family: var(--ow-font);
+}
+
+/* Full-bleed field wrapper: holds the palette gradient + starfield. */
+.ow-field {
+  position: relative;
+  min-height: 100%;
   width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1.125rem;
-  background-color: transparent;
-  border: 2px solid #742f99;
-  border-radius: 1.5rem;
-  color: #ffefd5;
-  font-weight: 600;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 239, 213, 0.05);
-  appearance: textfield;
-}
-.custom-input[type="number"]::-webkit-inner-spin-button,
-.custom-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.custom-input::placeholder {
-  color: #b88be0;
-  opacity: 0.8;
+  overflow: hidden;
 }
 
-/* Character Icons */
-.character-icon {
-  width: 60px;
-  height: 60px;
-  border: 2px solid #9f3cff;
-  border-radius: 9999px;
-  padding: 4px;
-  box-shadow: 0 0 10px rgba(159, 60, 255, 0.4);
-  cursor: pointer;
+/* Centering column for phone-portrait content on larger viewports. */
+.ow-screen {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.character-selected {
-  background-color: #2a0d45;
-  border: 4px solid #ffffff;
-  cursor: default;
-}
+/* Kill the default scrollbar like the prototype. */
+::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Button Base */
-button.custom-btn {
-  width: 16rem;
-  font-size: 1.375rem;
-  font-weight: 700;
-  padding: 0.875rem;
-  border-radius: 2rem;
-  color: #fff8f5;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.25), 0 3px 6px rgba(0, 0, 0, 0.2);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+/* ── Animations (lifted verbatim from the design's <style> block) ── */
+@keyframes ow-twinkle { 0%,100%{opacity:.3} 50%{opacity:1} }
+@keyframes ow-spin { to { transform: rotate(360deg); } }
+@keyframes ow-pop { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
+@keyframes ow-fade { 0%{opacity:0} 100%{opacity:1} }
+@keyframes ow-confetti {
+  0% { transform: translate(0,0) rotate(0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(.4); opacity: 0; }
 }
-button.custom-btn:active {
-  transform: translateY(2px);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+@keyframes ow-winring {
+  0%,100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.14); opacity: 0.55; }
 }
-button.create {
-  background: linear-gradient(to right, #f4415e, #ec4899);
-}
-button.create:hover {
-  background: linear-gradient(to right, #e11d48, #db2777);
-}
-button.join {
-  background: linear-gradient(to right, #8b5cf6, #7c3aed);
-}
-button.join:hover {
-  background: linear-gradient(to right, #7c3aed, #6d28d9);
-}
+@keyframes ow-wobble { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+@keyframes ow-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes ow-drop { 0%{transform:translateY(-42px) scale(.4);opacity:0} 62%{transform:translateY(4px) scale(1.1);opacity:1} 100%{transform:translateY(0) scale(1)} }
+@keyframes ow-winbounce { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.06)} }
+@keyframes ow-trophy { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-12px) rotate(4deg)} }

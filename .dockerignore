@@ -1,0 +1,25 @@
+# Dependencies & build output are produced inside the image build stage.
+node_modules
+www
+dist
+.angular
+
+# Native platform projects
+ios
+android
+
+# VCS / editor / OS noise
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+
+# Local env & logs
+*.log
+npm-debug.log*
+.env
+.env.*
+
+# Docs / CI not needed at build time
+README.md

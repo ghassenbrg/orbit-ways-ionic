@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule, Routes } from '@angular/router';
 
-import { GamePage } from './game.page';
+import { SettingsPage } from './settings.page';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 const routes: Routes = [
   {
     path: '',
-    component: GamePage,
+    component: SettingsPage,
   },
 ];
 
@@ -22,6 +22,6 @@ const routes: Routes = [
     SharedModule,
     RouterModule.forChild(routes),
   ],
-  declarations: [GamePage],
+  declarations: [SettingsPage],
 })
-export class GamePageModule {}
+export class SettingsPageModule {}
