@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { GameConfigService } from 'src/app/service/game-config.service';
 import { GameEngineService } from 'src/app/service/game-engine.service';
@@ -37,7 +37,7 @@ export class RoomPage implements OnInit, OnDestroy {
   private sub?: Subscription;
 
   constructor(
-    private router: Router,
+    private nav: NavController,
     private http: HttpClient,
     private settings: SettingsService,
     private config: GameConfigService,
@@ -94,7 +94,10 @@ export class RoomPage implements OnInit, OnDestroy {
   }
 
   openSettings(): void {
-    this.router.navigate(['/settings']);
+    // Drop focus from the gear before its page is hidden, else the hidden
+    // page keeps a focused descendant under aria-hidden (a11y warning).
+    (document.activeElement as HTMLElement | null)?.blur();
+    this.nav.navigateForward('/settings');
   }
 
   /** Label under a character pick button (e.g. "rocket", "astronaut"). */
@@ -192,6 +195,6 @@ export class RoomPage implements OnInit, OnDestroy {
       myName,
     });
     this.busy = false;
-    this.router.navigate(['/game'], { replaceUrl: true });
+    this.nav.navigateRoot('/game', { animationDirection: 'forward' });
   }
 }

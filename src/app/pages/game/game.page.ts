@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { GameConfigService, GameMode } from 'src/app/service/game-config.service';
@@ -67,7 +67,7 @@ export class GamePage implements OnInit, OnDestroy {
   readonly sides: Side[] = ['B', 'W'];
 
   constructor(
-    private router: Router,
+    private nav: NavController,
     private http: HttpClient,
     private ws: WebsocketService,
     private settings: SettingsService,
@@ -80,7 +80,7 @@ export class GamePage implements OnInit, OnDestroy {
     this.subscribeSettings();
     const opts = await this.config.restore();
     if (!opts) {
-      this.router.navigate(['/room'], { replaceUrl: true });
+      this.nav.navigateRoot('/room');
       return;
     }
     this.mode = opts.mode;
@@ -253,10 +253,11 @@ export class GamePage implements OnInit, OnDestroy {
   }
 
   async quit(): Promise<void> {
+    (document.activeElement as HTMLElement | null)?.blur();
     this.clearTimers();
     if (this.mode === 'online') this.ws.disconnect();
     await this.config.clear();
-    this.router.navigate(['/room'], { replaceUrl: true });
+    this.nav.navigateRoot('/room', { animationDirection: 'back' });
   }
 
   copyCode(): void {

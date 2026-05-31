@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { AppSettings, SettingsService } from 'src/app/service/settings.service';
 import {
@@ -36,7 +36,7 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   private sub?: Subscription;
 
-  constructor(private settings: SettingsService, private router: Router) {}
+  constructor(private settings: SettingsService, private nav: NavController) {}
 
   ngOnInit(): void {
     this.sub = this.settings.settings$.subscribe((v) => {
@@ -51,7 +51,8 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   back(): void {
-    this.router.navigate(['/room']);
+    (document.activeElement as HTMLElement | null)?.blur();
+    this.nav.navigateBack('/room');
   }
 
   // ── Setters ──

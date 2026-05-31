@@ -1,6 +1,12 @@
 /* Basic CSS for apps built with Ionic */
+/* core.css is REQUIRED: it defines .ion-page (absolute + stacked) plus
+   .ion-page-hidden / .ion-page-invisible. Without it, stacked pages flow
+   vertically and an in-app navigation lands the new page below the fold —
+   a black screen that only "fixes" itself on a full refresh. */
+@import "@ionic/angular/css/core.css";
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
 /* ──────────────────────────────────────────────────────────────────────────
